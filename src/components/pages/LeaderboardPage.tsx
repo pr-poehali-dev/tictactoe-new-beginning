@@ -1,52 +1,56 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
-type Season = "all" | "season" | "weekly";
+type Filter = "all" | "season" | "weekly";
 
 const players = [
-  { rank: 1, name: "Magnus_X", elo: 2841, wins: 412, wr: 78, streak: 12, badge: "👑", country: "RU" },
-  { rank: 2, name: "Shadow_Pro", elo: 2720, wins: 388, wr: 74, streak: 7, badge: "🥈", country: "UA" },
-  { rank: 3, name: "DragonByte", elo: 2655, wins: 355, wr: 71, streak: 4, badge: "🥉", country: "BY" },
-  { rank: 4, name: "CryptoKing", elo: 2588, wins: 329, wr: 69, streak: 0, badge: "⭐", country: "RU" },
-  { rank: 5, name: "Alexxx_Pro", elo: 1482, wins: 89, wr: 63, streak: 3, badge: "🎯", country: "RU", isMe: true },
-  { rank: 6, name: "Night_Owl", elo: 1441, wins: 201, wr: 61, streak: 1, badge: "🌙", country: "KZ" },
-  { rank: 7, name: "Vanya_88", elo: 1398, wins: 176, wr: 58, streak: 0, badge: "", country: "RU" },
-  { rank: 8, name: "XQueen", elo: 1371, wins: 163, wr: 57, streak: 2, badge: "", country: "RU" },
-  { rank: 9, name: "GoldRush99", elo: 1344, wins: 149, wr: 55, streak: 0, badge: "", country: "MD" },
-  { rank: 10, name: "PawnBreaker", elo: 1312, wins: 138, wr: 53, streak: 1, badge: "", country: "RU" },
+  { rank: 1,  name: "Magnus_X",    elo: 2841, wins: 412, wr: 78, streak: 12, country: "RU", isMe: false },
+  { rank: 2,  name: "Shadow_Pro",  elo: 2720, wins: 388, wr: 74, streak: 7,  country: "UA", isMe: false },
+  { rank: 3,  name: "DragonByte",  elo: 2655, wins: 355, wr: 71, streak: 4,  country: "BY", isMe: false },
+  { rank: 4,  name: "CryptoKing",  elo: 2588, wins: 329, wr: 69, streak: 0,  country: "RU", isMe: false },
+  { rank: 5,  name: "Alexxx_Pro",  elo: 1482, wins: 89,  wr: 63, streak: 3,  country: "RU", isMe: true  },
+  { rank: 6,  name: "Night_Owl",   elo: 1441, wins: 201, wr: 61, streak: 1,  country: "KZ", isMe: false },
+  { rank: 7,  name: "Vanya_88",    elo: 1398, wins: 176, wr: 58, streak: 0,  country: "RU", isMe: false },
+  { rank: 8,  name: "XQueen",      elo: 1371, wins: 163, wr: 57, streak: 2,  country: "RU", isMe: false },
+  { rank: 9,  name: "GoldRush99",  elo: 1344, wins: 149, wr: 55, streak: 0,  country: "MD", isMe: false },
+  { rank: 10, name: "PawnBreaker", elo: 1312, wins: 138, wr: 53, streak: 1,  country: "RU", isMe: false },
 ];
 
 const medals = ["🥇", "🥈", "🥉"];
+const podiumOrder = [1, 0, 2]; // 2nd, 1st, 3rd
+const podiumHeights = ["h-24", "h-32", "h-20"];
 
 export default function LeaderboardPage() {
-  const [season, setSeason] = useState<Season>("all");
+  const [filter, setFilter] = useState<Filter>("all");
 
   const top3 = players.slice(0, 3);
-  const rest = players.slice(3);
+  const rest  = players.slice(3);
 
   return (
-    <div className="min-h-screen pt-20 pb-12 px-4">
+    <div className="min-h-screen pt-20 pb-16 px-5">
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <p className="text-xs text-muted-foreground uppercase tracking-[0.3em] mb-3">Таблица лидеров</p>
-          <h1 className="font-display text-5xl font-bold uppercase">Рейтинг</h1>
-          <p className="text-muted-foreground mt-3 text-sm">Сезон 3 · Обновляется в реальном времени</p>
+        <div className="mb-10 animate-fade-in">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Таблица лидеров</p>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <h1 className="font-black text-4xl tracking-tight">Рейтинг</h1>
+            <p className="text-xs text-muted-foreground font-medium">Сезон 3 · обновляется онлайн</p>
+          </div>
         </div>
 
         {/* Filters */}
-        <div className="flex gap-2 justify-center mb-8">
+        <div className="flex gap-1 mb-10">
           {([
-            { id: "all", label: "За всё время" },
-            { id: "season", label: "Сезон 3" },
-            { id: "weekly", label: "Эта неделя" },
-          ] as { id: Season; label: string }[]).map(f => (
+            { id: "all",    label: "Всё время" },
+            { id: "season", label: "Сезон 3"   },
+            { id: "weekly", label: "Неделя"    },
+          ] as { id: Filter; label: string }[]).map(f => (
             <button
               key={f.id}
-              onClick={() => setSeason(f.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all
-                ${season === f.id ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}
+              onClick={() => setFilter(f.id)}
+              className={`px-4 py-2 rounded text-xs font-bold tracking-wide transition-all
+                ${filter === f.id ? "bg-surface-3 text-foreground" : "text-muted-foreground hover:text-foreground"}
               `}
             >
               {f.label}
@@ -54,25 +58,27 @@ export default function LeaderboardPage() {
           ))}
         </div>
 
-        {/* Top 3 Podium */}
-        <div className="flex items-end justify-center gap-3 mb-8 animate-fade-in delay-100">
-          {[top3[1], top3[0], top3[2]].map((p, vi) => {
-            const heights = ["h-28", "h-36", "h-24"];
-            const originalRank = vi === 0 ? 1 : vi === 1 ? 0 : 2;
+        {/* Podium */}
+        <div className="flex items-end justify-center gap-3 mb-10 animate-fade-in delay-100">
+          {podiumOrder.map((pi, vi) => {
+            const p = top3[pi];
             return (
-              <div key={p.rank} className="flex flex-col items-center gap-3 flex-1 max-w-[140px]">
-                <div className="text-3xl">{medals[originalRank]}</div>
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-display font-bold text-xl
-                  ${originalRank === 0 ? "bg-gradient-to-br from-yellow-500/40 to-yellow-600/20 border border-yellow-500/40" : "bg-secondary border border-border"}
+              <div key={p.rank} className="flex flex-col items-center gap-2 flex-1 max-w-[130px]">
+                <div className="text-2xl">{medals[pi]}</div>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg border
+                  ${pi === 0
+                    ? "border-cream/30 bg-cream-subtle text-foreground"
+                    : "border-border bg-surface-2 text-muted-foreground"
+                  }
                 `}>
                   {p.name[0]}
                 </div>
                 <div className="text-center">
-                  <div className="font-semibold text-xs truncate max-w-[120px]">{p.name}</div>
-                  <div className={`font-display font-bold text-sm ${originalRank === 0 ? "gold-text" : "text-muted-foreground"}`}>{p.elo}</div>
+                  <div className="font-bold text-xs truncate max-w-[110px]">{p.name}</div>
+                  <div className={`font-black text-sm ${pi === 0 ? "cream" : "text-muted-foreground"}`}>{p.elo}</div>
                 </div>
-                <div className={`w-full ${heights[vi]} rounded-t-xl flex items-start justify-center pt-3 font-display font-bold text-2xl
-                  ${originalRank === 0 ? "bg-gradient-to-t from-primary/30 to-primary/10 border border-primary/30" : "bg-secondary border border-border"}
+                <div className={`w-full ${podiumHeights[vi]} rounded-t-lg flex items-start justify-center pt-2 font-black text-xl
+                  ${pi === 0 ? "bg-cream-subtle border border-cream/20 cream" : "bg-surface-2 border border-border text-muted-foreground"}
                 `}>
                   {p.rank}
                 </div>
@@ -82,63 +88,60 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Table */}
-        <div className="glass-card rounded-2xl overflow-hidden animate-fade-in delay-200">
-          <div className="grid grid-cols-12 px-6 py-3 text-xs text-muted-foreground uppercase tracking-wider border-b border-border">
-            <div className="col-span-1">#</div>
-            <div className="col-span-4">Игрок</div>
-            <div className="col-span-2 text-center">Elo</div>
-            <div className="col-span-2 text-center hidden sm:block">Победы</div>
-            <div className="col-span-2 text-center hidden sm:block">WR%</div>
-            <div className="col-span-3 sm:col-span-1 text-center">Серия</div>
+        <div className="card-premium overflow-hidden animate-fade-in delay-200">
+          <div className="grid grid-cols-12 px-5 py-3 border-b border-border">
+            <div className="col-span-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">#</div>
+            <div className="col-span-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Игрок</div>
+            <div className="col-span-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">Elo</div>
+            <div className="col-span-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center hidden sm:block">Победы</div>
+            <div className="col-span-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center hidden sm:block">WR%</div>
+            <div className="col-span-3 sm:col-span-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">🔥</div>
           </div>
           <div className="divide-y divide-border">
             {rest.map((p, i) => (
               <div
                 key={p.rank}
-                className={`grid grid-cols-12 px-6 py-4 items-center transition-colors animate-fade-in
-                  ${p.isMe ? "bg-primary/8 border-l-2 border-primary" : "hover:bg-secondary/30"}
+                className={`grid grid-cols-12 px-5 py-4 items-center transition-colors animate-fade-in
+                  ${p.isMe ? "bg-cream-subtle border-l-2 border-cream" : "hover:bg-surface-2"}
                 `}
-                style={{ animationDelay: `${i * 0.05}s` }}
+                style={{ animationDelay: `${i * 0.04}s` }}
               >
-                <div className="col-span-1 font-display font-bold text-muted-foreground">{p.rank}</div>
+                <div className="col-span-1 font-black text-sm text-muted-foreground">{p.rank}</div>
                 <div className="col-span-4 flex items-center gap-2 min-w-0">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm flex-shrink-0
-                    ${p.isMe ? "bg-primary/30 border border-primary/40" : "bg-secondary"}
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shrink-0
+                    ${p.isMe ? "bg-cream-subtle border border-cream/30 cream" : "bg-surface-2 border border-border text-muted-foreground"}
                   `}>
-                    {p.badge || p.name[0]}
+                    {p.name[0]}
                   </div>
                   <div className="min-w-0">
-                    <div className={`font-semibold text-sm truncate ${p.isMe ? "gold-text" : ""}`}>{p.name}</div>
-                    <div className="text-xs text-muted-foreground">{p.isMe ? "Вы" : p.country}</div>
+                    <div className={`font-bold text-sm truncate ${p.isMe ? "cream" : ""}`}>{p.name}</div>
+                    <div className="text-[10px] text-muted-foreground font-medium">{p.isMe ? "Вы" : p.country}</div>
                   </div>
                 </div>
-                <div className="col-span-2 text-center font-display font-bold text-sm">{p.elo}</div>
-                <div className="col-span-2 text-center text-sm hidden sm:block">{p.wins}</div>
-                <div className="col-span-2 text-center text-sm hidden sm:block">
-                  <span className={p.wr >= 65 ? "gold-text font-semibold" : ""}>{p.wr}%</span>
+                <div className="col-span-2 text-center font-black text-sm">{p.elo}</div>
+                <div className="col-span-2 text-center text-sm font-medium hidden sm:block text-muted-foreground">{p.wins}</div>
+                <div className="col-span-2 text-center text-sm font-bold hidden sm:block">
+                  <span className={p.wr >= 65 ? "cream" : "text-muted-foreground"}>{p.wr}%</span>
                 </div>
                 <div className="col-span-3 sm:col-span-1 text-center">
-                  {p.streak > 0 ? (
-                    <span className="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded-full font-semibold">
-                      🔥{p.streak}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground text-xs">—</span>
-                  )}
+                  {p.streak > 0
+                    ? <span className="text-xs font-bold text-orange-400">{p.streak}</span>
+                    : <span className="text-muted-foreground text-xs">—</span>
+                  }
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* My position highlight */}
-        <div className="mt-4 glass-card rounded-xl p-4 flex items-center gap-4 border border-primary/20 animate-fade-in delay-300">
-          <div className="text-2xl">📍</div>
-          <div className="flex-1">
-            <div className="font-semibold text-sm gold-text">Ваша позиция: #5 из 14 209 игроков</div>
-            <div className="text-xs text-muted-foreground">Топ 8% · Нужно ещё 106 очков до #4</div>
+        {/* My position */}
+        <div className="mt-3 card-premium p-4 flex items-center gap-3 animate-fade-in delay-300">
+          <Icon name="MapPin" size={14} className="cream shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-sm cream">Ваша позиция: #5 из 14 209</div>
+            <div className="text-xs text-muted-foreground font-medium">Топ 8% · +106 очков до #4</div>
           </div>
-          <Icon name="ChevronRight" size={18} className="text-muted-foreground" />
+          <Icon name="ChevronRight" size={14} className="text-muted-foreground shrink-0" />
         </div>
       </div>
     </div>

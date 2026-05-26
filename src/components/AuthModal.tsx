@@ -18,90 +18,96 @@ export default function AuthModal({ mode, onClose, onSuccess, onSwitch }: AuthMo
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
 
-      <div className="relative z-10 w-full max-w-md glass-card rounded-2xl p-8 animate-scale-in">
-        <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
-          <Icon name="X" size={20} />
+      <div className="relative z-10 w-full max-w-sm bg-card border border-border rounded-xl p-7 animate-scale-in">
+
+        {/* Close */}
+        <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
+          <Icon name="X" size={16} />
         </button>
 
-        <div className="text-center mb-8">
-          <div className="flex justify-center gap-2 mb-4 text-4xl">
-            <span className="symbol-x">X</span>
-            <span className="symbol-o">O</span>
+        {/* Header */}
+        <div className="mb-7">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="sym-x font-black text-xl">×</span>
+            <span className="sym-o font-black text-xl">○</span>
           </div>
-          <h2 className="font-display text-2xl font-bold uppercase tracking-widest">
-            {mode === "login" ? "Вход" : "Регистрация"}
+          <h2 className="font-black text-xl tracking-tight mb-1">
+            {mode === "login" ? "Добро пожаловать" : "Создать аккаунт"}
           </h2>
           {mode === "register" && (
-            <p className="text-muted-foreground text-sm mt-2">
-              🎁 +50 монет за регистрацию
+            <p className="text-muted-foreground text-xs">
+              +50 монет в подарок при регистрации
             </p>
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           {mode === "register" && (
-            <div>
-              <label className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">Логин</label>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Логин</label>
               <input
                 type="text"
                 placeholder="ваш_ник"
                 value={form.login}
                 onChange={e => setForm({ ...form, login: e.target.value })}
-                className="w-full bg-secondary border border-border rounded-lg px-4 py-3 text-sm outline-none focus:border-primary transition-colors"
+                className="w-full bg-secondary border border-border rounded-md px-3.5 py-2.5 text-sm font-medium outline-none focus:border-muted-foreground transition-colors placeholder:text-muted-foreground/40"
               />
             </div>
           )}
-          <div>
-            <label className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">Email</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Email</label>
             <input
               type="email"
               placeholder="you@mail.ru"
               value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
-              className="w-full bg-secondary border border-border rounded-lg px-4 py-3 text-sm outline-none focus:border-primary transition-colors"
+              className="w-full bg-secondary border border-border rounded-md px-3.5 py-2.5 text-sm font-medium outline-none focus:border-muted-foreground transition-colors placeholder:text-muted-foreground/40"
             />
           </div>
-          <div>
-            <label className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">Пароль</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Пароль</label>
             <input
               type="password"
               placeholder="••••••••"
               value={form.password}
               onChange={e => setForm({ ...form, password: e.target.value })}
-              className="w-full bg-secondary border border-border rounded-lg px-4 py-3 text-sm outline-none focus:border-primary transition-colors"
+              className="w-full bg-secondary border border-border rounded-md px-3.5 py-2.5 text-sm font-medium outline-none focus:border-muted-foreground transition-colors placeholder:text-muted-foreground/40"
             />
           </div>
 
-          <button
-            type="submit"
-            className="mt-2 w-full bg-primary text-primary-foreground font-display font-semibold uppercase tracking-widest py-3 rounded-lg hover:opacity-90 transition-opacity animate-pulse-gold"
-          >
-            {mode === "login" ? "Войти" : "Создать аккаунт"}
+          <button type="submit" className="btn-cream w-full py-2.5 text-sm mt-1">
+            {mode === "login" ? "Войти" : "Зарегистрироваться"}
           </button>
         </form>
 
-        <div className="mt-6">
-          <div className="relative flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground">или</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {["Google", "Telegram", "ВКонтакте"].map((p) => (
-              <button key={p} className="bg-secondary hover:bg-secondary/70 border border-border rounded-lg py-2.5 text-xs font-medium transition-colors">
-                {p}
-              </button>
-            ))}
-          </div>
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-5">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-muted-foreground">или войти через</span>
+          <div className="flex-1 h-px bg-border" />
         </div>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        {/* OAuth */}
+        <div className="grid grid-cols-3 gap-2">
+          {["Google", "Telegram", "ВКонтакте"].map((p) => (
+            <button
+              key={p}
+              className="bg-secondary hover:bg-surface-3 border border-border rounded-md py-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+
+        {/* Switch */}
+        <p className="text-center text-xs text-muted-foreground mt-5">
           {mode === "login" ? "Нет аккаунта?" : "Уже есть аккаунт?"}{" "}
           <button
             onClick={() => onSwitch(mode === "login" ? "register" : "login")}
-            className="gold-text hover:underline font-medium"
+            className="cream hover:underline font-semibold"
           >
             {mode === "login" ? "Зарегистрироваться" : "Войти"}
           </button>

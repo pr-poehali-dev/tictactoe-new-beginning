@@ -19,10 +19,9 @@ const WIN_LINES = [
 
 function checkWinner(board: Cell[]): { winner: "X" | "O" | null; line: number[] } {
   for (const line of WIN_LINES) {
-    const [a,b,c] = line;
-    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+    const [a, b, c] = line;
+    if (board[a] && board[a] === board[b] && board[a] === board[c])
       return { winner: board[a], line };
-    }
   }
   return { winner: null, line: [] };
 }
@@ -32,74 +31,43 @@ function minimax(board: Cell[], isMax: boolean): number {
   if (winner === "O") return 10;
   if (winner === "X") return -10;
   if (board.every(c => c !== null)) return 0;
-
   if (isMax) {
     let best = -Infinity;
-    board.forEach((c, i) => {
-      if (!c) {
-        board[i] = "O";
-        best = Math.max(best, minimax(board, false));
-        board[i] = null;
-      }
-    });
+    board.forEach((c, i) => { if (!c) { board[i] = "O"; best = Math.max(best, minimax(board, false)); board[i] = null; } });
     return best;
   } else {
     let best = Infinity;
-    board.forEach((c, i) => {
-      if (!c) {
-        board[i] = "X";
-        best = Math.min(best, minimax(board, true));
-        board[i] = null;
-      }
-    });
+    board.forEach((c, i) => { if (!c) { board[i] = "X"; best = Math.min(best, minimax(board, true)); board[i] = null; } });
     return best;
   }
 }
 
 function getBotMove(board: Cell[], difficulty: string): number {
-  const empty = board.map((c,i) => c === null ? i : -1).filter(i => i !== -1);
+  const empty = board.map((c, i) => c === null ? i : -1).filter(i => i !== -1);
   if (difficulty === "ai-easy") {
-    // Check win first, otherwise random
-    for (const i of empty) {
-      const b = [...board]; b[i] = "O";
-      if (checkWinner(b).winner === "O") return i;
-    }
+    for (const i of empty) { const b = [...board]; b[i] = "O"; if (checkWinner(b).winner === "O") return i; }
     return empty[Math.floor(Math.random() * empty.length)];
   }
   if (difficulty === "ai-medium") {
-    // Win if possible
-    for (const i of empty) {
-      const b = [...board]; b[i] = "O";
-      if (checkWinner(b).winner === "O") return i;
-    }
-    // Block player
-    for (const i of empty) {
-      const b = [...board]; b[i] = "X";
-      if (checkWinner(b).winner === "X") return i;
-    }
-    // With 20% chance make dumb move
+    for (const i of empty) { const b = [...board]; b[i] = "O"; if (checkWinner(b).winner === "O") return i; }
+    for (const i of empty) { const b = [...board]; b[i] = "X"; if (checkWinner(b).winner === "X") return i; }
     if (Math.random() < 0.2) return empty[Math.floor(Math.random() * empty.length)];
     if (board[4] === null) return 4;
     const corners = [0,2,6,8].filter(i => board[i] === null);
     if (corners.length) return corners[0];
     return empty[Math.floor(Math.random() * empty.length)];
   }
-  // Expert: minimax
   let best = -Infinity; let move = empty[0];
-  for (const i of empty) {
-    const b = [...board]; b[i] = "O";
-    const score = minimax(b, false);
-    if (score > best) { best = score; move = i; }
-  }
+  for (const i of empty) { const b = [...board]; b[i] = "O"; const s = minimax(b, false); if (s > best) { best = s; move = i; } }
   return move;
 }
 
 const modeOptions = [
-  { id: "ai-easy", label: "Новичок", desc: "Бот делает случайные ходы", icon: "Bot", badge: "БЕСПЛАТНО" },
-  { id: "ai-medium", label: "Любитель", desc: "Бот защищается, иногда ошибается", icon: "Bot", badge: "БЕСПЛАТНО" },
-  { id: "ai-expert", label: "Эксперт", desc: "Минимакс — нельзя победить", icon: "Cpu", badge: "ВЫЗОВ" },
-  { id: "pvp", label: "Быстрая игра", desc: "PvP по рейтингу, 15 сек/ход", icon: "Swords", badge: "+МОНЕТЫ" },
-  { id: "friend", label: "С другом", desc: "По ссылке, без рейтинга", icon: "Users", badge: "ДЛЯ ДРУЗЕЙ" },
+  { id: "ai-easy",   label: "Новичок",      desc: "Бот ошибается — идеально для начала",    icon: "Bot",   tag: "ЛЕГКО" },
+  { id: "ai-medium", label: "Любитель",     desc: "Бот защищается, иногда даёт слабину",    icon: "Bot",   tag: "СРЕДНЕ" },
+  { id: "ai-expert", label: "Эксперт",      desc: "Минимакс — максимум что вы добьётесь: ничья", icon: "Cpu",   tag: "ВЫЗОВ" },
+  { id: "pvp",       label: "Быстрая игра", desc: "PvP по рейтингу, 15 сек на ход",         icon: "Swords", tag: "+МОНЕТЫ" },
+  { id: "friend",    label: "С другом",     desc: "По ссылке, без рейтинга",                icon: "Users",  tag: "ДРУЗЬЯ" },
 ];
 
 export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
@@ -111,63 +79,42 @@ export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
   const [botThinking, setBotThinking] = useState(false);
   const [timer, setTimer] = useState(15);
 
-  const startGame = (selectedMode: Mode) => {
-    setMode(selectedMode);
-    setBoard(Array(9).fill(null));
-    setTurn("X");
-    setStatus("playing");
-    setWinLine([]);
-    setTimer(15);
+  const startGame = (m: Mode) => {
+    setMode(m); setBoard(Array(9).fill(null));
+    setTurn("X"); setStatus("playing"); setWinLine([]); setTimer(15);
   };
-
-  const resetGame = () => {
-    setMode(null);
-    setBoard(Array(9).fill(null));
-    setStatus("playing");
-    setWinLine([]);
-  };
+  const resetGame = () => { setMode(null); setBoard(Array(9).fill(null)); setStatus("playing"); setWinLine([]); };
 
   const makeMove = useCallback((index: number) => {
     if (board[index] || status !== "playing" || botThinking) return;
-    const newBoard = [...board];
-    newBoard[index] = turn;
-    const { winner, line } = checkWinner(newBoard);
-    setBoard(newBoard);
+    const nb = [...board]; nb[index] = turn;
+    const { winner, line } = checkWinner(nb);
+    setBoard(nb);
     if (winner) {
       setWinLine(line);
-      if (winner === "X") {
-        setStatus("won");
-        if (mode === "pvp") setCoins(coins + 15);
-      } else {
-        setStatus("lost");
-      }
+      if (winner === "X") { setStatus("won"); if (mode === "pvp") setCoins(coins + 15); }
+      else setStatus("lost");
       return;
     }
-    if (newBoard.every(c => c !== null)) { setStatus("draw"); return; }
+    if (nb.every(c => c !== null)) { setStatus("draw"); return; }
     setTurn(turn === "X" ? "O" : "X");
   }, [board, turn, status, botThinking, mode, coins, setCoins]);
 
-  // Bot move
   useEffect(() => {
-    if (!mode || mode === "pvp" || mode === "friend") return;
-    if (turn !== "O" || status !== "playing") return;
+    if (!mode || mode === "pvp" || mode === "friend" || turn !== "O" || status !== "playing") return;
     setBotThinking(true);
-    const delay = mode === "ai-expert" ? 700 : 400;
-    const timeout = setTimeout(() => {
-      const idx = getBotMove(board, mode);
-      const newBoard = [...board];
-      newBoard[idx] = "O";
-      const { winner, line } = checkWinner(newBoard);
-      setBoard(newBoard);
+    const t = setTimeout(() => {
+      const nb = [...board]; nb[getBotMove(board, mode)] = "O";
+      const { winner, line } = checkWinner(nb);
+      setBoard(nb);
       if (winner) { setWinLine(line); setStatus("lost"); }
-      else if (newBoard.every(c => c !== null)) setStatus("draw");
+      else if (nb.every(c => c !== null)) setStatus("draw");
       else setTurn("X");
       setBotThinking(false);
-    }, delay);
-    return () => clearTimeout(timeout);
+    }, mode === "ai-expert" ? 700 : 400);
+    return () => clearTimeout(t);
   }, [turn, mode, board, status]);
 
-  // PvP timer
   useEffect(() => {
     if (mode !== "pvp" || status !== "playing") return;
     if (timer <= 0) { makeMove(board.findIndex(c => c === null)); return; }
@@ -175,124 +122,118 @@ export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
     return () => clearInterval(t);
   }, [timer, mode, status, board, makeMove]);
 
-  useEffect(() => {
-    if (mode === "pvp") setTimer(15);
-  }, [turn, mode]);
+  useEffect(() => { if (mode === "pvp") setTimer(15); }, [turn, mode]);
+
+  const isAI = mode !== "pvp" && mode !== "friend";
+  const modeName = modeOptions.find(m => m.id === mode)?.label;
 
   if (!mode) {
     return (
-      <div className="min-h-screen pt-20 pb-12 px-4 bg-grid">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-10 animate-fade-in">
-            <p className="text-xs text-muted-foreground uppercase tracking-[0.3em] mb-3">Игровая арена</p>
-            <h1 className="font-display text-5xl font-bold uppercase">Выбор режима</h1>
+      <div className="min-h-screen pt-20 pb-16 px-5">
+        <div className="max-w-xl mx-auto">
+          <div className="mb-10 animate-fade-in">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">Игровая арена</p>
+            <h1 className="font-black text-4xl tracking-tight">Выбор режима</h1>
           </div>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {modeOptions.map((m, i) => (
               <button
                 key={m.id}
                 onClick={() => startGame(m.id as Mode)}
-                className="glass-card rounded-2xl p-5 flex items-center gap-5 hover:border-primary/40 transition-all group animate-fade-in text-left"
-                style={{ animationDelay: `${i * 0.08}s` }}
+                className="card-premium p-4 flex items-center gap-4 hover:border-muted-foreground/30 transition-all text-left group animate-fade-in"
+                style={{ animationDelay: `${i * 0.07}s` }}
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center gold-text group-hover:bg-primary/20 transition-colors flex-shrink-0">
-                  <Icon name={m.icon} size={24} />
+                <div className="w-10 h-10 rounded-lg bg-surface-2 border border-border flex items-center justify-center cream shrink-0 group-hover:border-muted-foreground/40 transition-colors">
+                  <Icon name={m.icon} size={18} />
                 </div>
-                <div className="flex-1">
-                  <div className="font-display font-bold uppercase tracking-wide text-lg">{m.label}</div>
-                  <div className="text-muted-foreground text-sm">{m.desc}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm mb-0.5">{m.label}</div>
+                  <div className="text-muted-foreground text-xs font-medium">{m.desc}</div>
                 </div>
-                <div className={`text-xs font-bold px-3 py-1 rounded-full border
-                  ${m.badge === "+МОНЕТЫ" ? "gold-text border-primary/30 bg-primary/10" : "text-muted-foreground border-border bg-secondary"}
-                `}>
-                  {m.badge}
-                </div>
+                <span className={`shrink-0 ${m.tag === "+МОНЕТЫ" ? "badge-cream" : "badge-muted"}`}>
+                  {m.tag}
+                </span>
               </button>
             ))}
           </div>
-
-          {mode === null && (
-            <div className="mt-4 glass-card rounded-xl p-4 border border-border/50">
-              <p className="text-xs text-muted-foreground text-center">
-                💡 Игры с ботом не приносят монеты. PvP — источник заработка.
-              </p>
-            </div>
-          )}
+          <div className="mt-4 p-3 rounded-lg bg-surface-2 border border-border">
+            <p className="text-xs text-muted-foreground font-medium text-center">
+              Игры с ботом не приносят монеты · PvP — источник заработка
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
-  const isAI = mode !== "pvp" && mode !== "friend";
-  const currentLabel = modeOptions.find(m => m.id === mode)?.label;
-
   return (
-    <div className="min-h-screen pt-20 pb-12 px-4">
-      <div className="max-w-lg mx-auto">
-        {/* Game Header */}
-        <div className="flex items-center justify-between mb-6 animate-fade-in">
-          <button onClick={resetGame} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm">
-            <Icon name="ArrowLeft" size={16} />
+    <div className="min-h-screen pt-20 pb-16 px-5">
+      <div className="max-w-md mx-auto">
+
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-7 animate-fade-in">
+          <button onClick={resetGame} className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+            <Icon name="ArrowLeft" size={14} />
             Режимы
           </button>
-          <div className="text-xs text-muted-foreground uppercase tracking-wider">{currentLabel}</div>
-          {mode === "pvp" && (
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-lg border-2 transition-colors
-              ${timer <= 5 ? "border-red-500 text-red-500" : "border-primary gold-text"}
+          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{modeName}</span>
+          {mode === "pvp" ? (
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-base border-2 transition-colors
+              ${timer <= 5 ? "border-red-500 text-red-500" : "border-border cream"}
             `}>
               {timer}
             </div>
-          )}
-          {mode !== "pvp" && <div className="w-10" />}
+          ) : <div className="w-9" />}
         </div>
 
         {/* Players */}
         <div className="flex items-center justify-between mb-6 animate-fade-in delay-100">
-          <div className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${turn === "X" && status === "playing" ? "bg-primary/15 border border-primary/30" : "border border-transparent"}`}>
-            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center font-display font-bold symbol-x text-lg">A</div>
+          <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all border
+            ${turn === "X" && status === "playing" ? "border-cream/30 bg-cream-subtle" : "border-transparent"}
+          `}>
+            <div className="w-8 h-8 rounded-md bg-surface-2 border border-border flex items-center justify-center font-black sym-x text-sm">A</div>
             <div>
-              <div className="font-semibold text-sm">Alexxx_Pro</div>
-              <div className="text-xs text-muted-foreground">Elo: 1482</div>
+              <div className="font-bold text-xs">Alexxx_Pro</div>
+              <div className="text-muted-foreground text-[10px] font-medium">Elo 1482</div>
             </div>
-            <span className="symbol-x font-display font-bold text-xl ml-1">X</span>
+            <span className="sym-x font-black text-lg ml-1">×</span>
           </div>
 
-          <div className="text-muted-foreground font-display font-bold text-sm">VS</div>
+          <span className="text-muted-foreground text-xs font-bold">VS</span>
 
-          <div className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${turn === "O" && status === "playing" ? "bg-cyan-900/20 border border-cyan-500/30" : "border border-transparent"}`}>
-            <span className="symbol-o font-display font-bold text-xl mr-1">O</span>
+          <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all border
+            ${turn === "O" && status === "playing" ? "border-blue-400/30 bg-blue-950/20" : "border-transparent"}
+          `}>
+            <span className="sym-o font-black text-lg mr-1">○</span>
             <div className="text-right">
-              <div className="font-semibold text-sm">{isAI ? "Бот" : "Соперник"}</div>
-              <div className="text-xs text-muted-foreground">{isAI ? currentLabel : "Elo: ~1470"}</div>
+              <div className="font-bold text-xs">{isAI ? "Бот" : "Соперник"}</div>
+              <div className="text-muted-foreground text-[10px] font-medium">{isAI ? modeName : "Elo ~1470"}</div>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-cyan-900/30 flex items-center justify-center">
-              {isAI ? <Icon name="Bot" size={16} className="text-cyan-400" /> : <Icon name="User" size={16} />}
+            <div className="w-8 h-8 rounded-md bg-surface-2 border border-border flex items-center justify-center">
+              {isAI ? <Icon name="Bot" size={14} className="text-muted-foreground" /> : <Icon name="User" size={14} className="text-muted-foreground" />}
             </div>
           </div>
         </div>
 
         {/* Board */}
-        <div className="relative mb-6 animate-scale-in delay-200">
-          <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/8 to-cyan-500/5 blur-2xl" />
-          <div className="relative grid grid-cols-3 gap-3 bg-card border border-border p-4 rounded-2xl">
+        <div className="relative mb-6 animate-scale-in delay-150">
+          <div className="grid grid-cols-3 gap-3 bg-card border border-border p-4 rounded-xl">
             {board.map((cell, i) => (
               <button
                 key={i}
-                onClick={() => (mode === "friend" ? true : turn === "X") && makeMove(i)}
+                onClick={() => (mode === "friend" || turn === "X") && makeMove(i)}
                 disabled={!!cell || status !== "playing" || (isAI && turn === "O")}
-                className={`h-24 sm:h-28 flex items-center justify-center rounded-xl font-display font-bold text-5xl transition-all duration-200 border
+                className={`h-24 sm:h-28 flex items-center justify-center rounded-lg border font-black text-5xl transition-all duration-200
                   ${winLine.includes(i)
-                    ? "bg-primary/20 border-primary scale-105"
+                    ? "bg-cream-subtle border-cream/30 scale-[1.04]"
                     : cell
-                      ? "bg-secondary border-border cursor-default"
-                      : "bg-secondary/60 border-border hover:bg-secondary hover:border-primary/30 hover:scale-[1.02] active:scale-95"
+                      ? "bg-surface-2 border-border cursor-default"
+                      : "bg-secondary border-border hover:bg-surface-3 hover:border-muted-foreground/20 hover:scale-[1.02] active:scale-95"
                   }
                 `}
               >
                 {cell && (
-                  <span className={`${cell === "X" ? "symbol-x" : "symbol-o"} animate-scale-in`}>
-                    {cell}
-                  </span>
+                  <span className={`${cell === "X" ? "sym-x" : "sym-o"} animate-scale-in`}>{cell}</span>
                 )}
               </button>
             ))}
@@ -300,51 +241,45 @@ export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
         </div>
 
         {/* Status */}
-        <div className="animate-fade-in delay-300">
+        <div className="animate-fade-in delay-200">
           {status === "playing" && (
-            <div className="text-center text-muted-foreground text-sm">
+            <div className="text-center text-xs text-muted-foreground font-semibold">
               {botThinking ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-pulse" />
                   Бот думает...
                 </span>
               ) : (
-                <span>Ход: <strong className={turn === "X" ? "gold-text" : "text-cyan-400"}>{turn === "X" ? "Вы (X)" : isAI ? "Бот (O)" : "Соперник (O)"}</strong></span>
+                <span>Ход: <span className={turn === "X" ? "cream font-bold" : "text-blue-400 font-bold"}>{turn === "X" ? "Вы (×)" : isAI ? "Бот (○)" : "Соперник (○)"}</span></span>
               )}
             </div>
           )}
 
           {status !== "playing" && (
-            <div className="glass-card rounded-2xl p-6 text-center border border-primary/20">
+            <div className="card-premium p-6 text-center">
               <div className="text-4xl mb-3">
                 {status === "won" ? "🏆" : status === "lost" ? "😤" : "🤝"}
               </div>
-              <h2 className="font-display text-3xl font-bold uppercase mb-2">
-                {status === "won" ? "Победа!" : status === "lost" ? "Поражение" : "Ничья"}
+              <h2 className="font-black text-2xl tracking-tight mb-2">
+                {status === "won" ? "Победа" : status === "lost" ? "Поражение" : "Ничья"}
               </h2>
               {mode === "pvp" && status === "won" && (
-                <p className="gold-text text-sm font-semibold mb-4">+15 монет · +18 рейтинга</p>
+                <p className="cream text-xs font-bold mb-4">+15 монет · +18 рейтинга</p>
               )}
               {mode === "pvp" && status === "lost" && (
                 <div className="mb-4">
-                  <p className="text-muted-foreground text-sm mb-3">Потеряно -14 рейтинга</p>
-                  <button className="flex items-center gap-2 mx-auto text-xs border border-primary/40 gold-text px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors">
-                    <Icon name="Play" size={13} />
-                    Восстановить рейтинг (смотреть рекламу)
+                  <p className="text-muted-foreground text-xs font-medium mb-3">−14 рейтинга</p>
+                  <button className="flex items-center gap-2 mx-auto text-xs border border-border text-muted-foreground hover:text-foreground px-4 py-2 rounded-lg transition-colors font-semibold">
+                    <Icon name="Play" size={12} />
+                    Восстановить рейтинг (реклама)
                   </button>
                 </div>
               )}
-              <div className="flex gap-3 justify-center mt-4">
-                <button
-                  onClick={() => startGame(mode)}
-                  className="bg-primary text-primary-foreground font-display font-bold uppercase tracking-wide px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
-                >
+              <div className="flex gap-2 justify-center mt-5">
+                <button onClick={() => startGame(mode)} className="btn-cream px-6 py-2.5 text-sm">
                   Ещё раз
                 </button>
-                <button
-                  onClick={resetGame}
-                  className="border border-border text-foreground px-6 py-3 rounded-xl hover:bg-secondary transition-colors font-medium"
-                >
+                <button onClick={resetGame} className="btn-ghost px-6 py-2.5 text-sm">
                   Меню
                 </button>
               </div>

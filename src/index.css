@@ -4,40 +4,43 @@
 
 @layer base {
   :root {
-    --background: 220 16% 8%;
-    --foreground: 40 20% 92%;
+    /* Тёмный премиум: почти чёрный фон, кремово-бежевые акценты */
+    --background: 0 0% 5%;
+    --foreground: 36 20% 90%;
 
-    --card: 220 14% 11%;
-    --card-foreground: 40 20% 92%;
+    --card: 0 0% 8%;
+    --card-foreground: 36 20% 90%;
 
-    --popover: 220 14% 11%;
-    --popover-foreground: 40 20% 92%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 36 20% 90%;
 
-    --primary: 38 85% 62%;
-    --primary-foreground: 220 16% 8%;
+    --primary: 36 60% 75%;
+    --primary-foreground: 0 0% 5%;
 
-    --secondary: 220 12% 16%;
-    --secondary-foreground: 40 20% 92%;
+    --secondary: 0 0% 11%;
+    --secondary-foreground: 36 20% 90%;
 
-    --muted: 220 12% 16%;
-    --muted-foreground: 220 10% 52%;
+    --muted: 0 0% 11%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 38 85% 62%;
-    --accent-foreground: 220 16% 8%;
+    --accent: 36 60% 75%;
+    --accent-foreground: 0 0% 5%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 40 20% 92%;
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 36 20% 90%;
 
-    --border: 220 12% 18%;
-    --input: 220 12% 18%;
-    --ring: 38 85% 62%;
+    --border: 0 0% 13%;
+    --input: 0 0% 13%;
+    --ring: 36 60% 75%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    --gold: 38 85% 62%;
-    --gold-dim: 38 60% 45%;
-    --surface: 220 14% 13%;
-    --surface-2: 220 12% 17%;
+    --cream: 36 60% 75%;
+    --cream-dim: 36 30% 55%;
+    --cream-subtle: 36 15% 15%;
+    --surface: 0 0% 8%;
+    --surface-2: 0 0% 11%;
+    --surface-3: 0 0% 14%;
   }
 }
 
@@ -46,111 +49,109 @@
     @apply border-border;
   }
 
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-family: "Golos Text", sans-serif;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 400;
   }
 
   h1,
   h2,
   h3,
-  .font-display {
-    font-family: "Oswald", sans-serif;
-    letter-spacing: 0.02em;
+  h4,
+  h5 {
+    font-family: "Montserrat", sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer utilities {
+  .cream {
+    color: hsl(var(--cream));
+  }
+  .cream-dim {
+    color: hsl(var(--cream-dim));
+  }
+  .bg-surface {
+    background: hsl(var(--surface));
+  }
+  .bg-surface-2 {
+    background: hsl(var(--surface-2));
+  }
+  .bg-surface-3 {
+    background: hsl(var(--surface-3));
+  }
+  .bg-cream-subtle {
+    background: hsl(var(--cream-subtle));
+  }
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-105;
   }
-
-  .gold-text {
-    color: hsl(var(--gold));
-  }
-
-  .gold-border {
-    border-color: hsl(var(--gold));
-  }
-
-  .surface {
-    background: hsl(var(--surface));
-  }
-
-  .surface-2 {
-    background: hsl(var(--surface-2));
-  }
 }
 
-/* Animations */
+/* ─── Анимации ─── */
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
 @keyframes scale-in {
   from {
     opacity: 0;
-    transform: scale(0.94);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
-
 @keyframes slide-in-right {
   from {
     opacity: 0;
-    transform: translateX(24px);
+    transform: translateX(20px);
   }
   to {
     opacity: 1;
     transform: translateX(0);
   }
 }
-
-@keyframes pulse-gold {
-  0%,
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
   100% {
-    box-shadow: 0 0 0 0 hsla(38, 85%, 62%, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 0 8px hsla(38, 85%, 62%, 0);
-  }
-}
-
-@keyframes grid-glow {
-  0%,
-  100% {
-    opacity: 0.04;
-  }
-  50% {
-    opacity: 0.09;
+    background-position: 400px 0;
   }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.4s ease both;
+  animation: fade-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .animate-scale-in {
-  animation: scale-in 0.3s ease both;
+  animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .animate-slide-in-right {
-  animation: slide-in-right 0.35s ease both;
-}
-.animate-pulse-gold {
-  animation: pulse-gold 2s ease infinite;
+  animation: slide-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.delay-50 {
+  animation-delay: 0.05s;
+}
 .delay-100 {
   animation-delay: 0.1s;
+}
+.delay-150 {
+  animation-delay: 0.15s;
 }
 .delay-200 {
   animation-delay: 0.2s;
@@ -165,45 +166,95 @@
   animation-delay: 0.5s;
 }
 
-/* Grid background pattern */
-.bg-grid {
-  background-image:
-    linear-gradient(hsla(38, 85%, 62%, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, hsla(38, 85%, 62%, 0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
+/* ─── Карточка ─── */
+.card-premium {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  transition: border-color 0.2s;
+}
+.card-premium:hover {
+  border-color: hsl(0 0% 20%);
 }
 
-/* Glassmorphism card */
-.glass-card {
-  background: hsla(220, 14%, 13%, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid hsla(38, 85%, 62%, 0.12);
-}
-
-/* X and O symbols */
-.symbol-x {
-  color: hsl(var(--gold));
-  font-family: "Oswald", sans-serif;
+/* ─── Кнопки ─── */
+.btn-cream {
+  background: hsl(var(--cream));
+  color: hsl(0 0% 5%);
+  font-family: "Montserrat", sans-serif;
   font-weight: 700;
+  letter-spacing: 0.03em;
+  transition: opacity 0.15s;
+  border-radius: 8px;
+}
+.btn-cream:hover {
+  opacity: 0.85;
 }
 
-.symbol-o {
-  color: hsl(200, 80%, 65%);
-  font-family: "Oswald", sans-serif;
+.btn-ghost {
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  border-radius: 8px;
+}
+.btn-ghost:hover {
+  border-color: hsl(0 0% 28%);
+  background: hsl(var(--surface-2));
+}
+
+/* ─── Символы X / O ─── */
+.sym-x {
+  color: hsl(var(--cream));
+  font-weight: 800;
+}
+.sym-o {
+  color: hsl(210 80% 72%);
+  font-weight: 800;
+}
+
+/* ─── Бейджи ─── */
+.badge-cream {
+  background: hsl(var(--cream-subtle));
+  color: hsl(var(--cream));
+  font-size: 0.6rem;
   font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.badge-muted {
+  background: hsl(0 0% 12%);
+  color: hsl(0 0% 42%);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
 }
 
-/* Scrollbar */
+/* ─── Скролл ─── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 ::-webkit-scrollbar-track {
   background: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
+  background: hsl(0 0% 16%);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--gold));
+  background: hsl(0 0% 25%);
+}
+
+/* ─── Тонкая линия сверху (декор навигации) ─── */
+.nav-top-line {
+  border-top: 1px solid hsl(var(--border));
 }

@@ -1,170 +1,148 @@
 import Icon from "@/components/ui/icon";
 
 const features = [
-  { icon: "BanIcon", label: "Без рекламы", desc: "Никаких баннеров и прерываний" },
-  { icon: "BarChart3", label: "Аналитика матчей", desc: "Тепловая карта ходов и решающий момент" },
-  { icon: "Calendar", label: "Статистика по дням", desc: "Винрейт, активность, прогресс по неделям" },
-  { icon: "BadgeCheck", label: "PRO-значок", desc: "Эксклюзивная метка в профиле и рейтинге" },
-  { icon: "Zap", label: "Двойной опыт", desc: "×2 монеты за победы в PvP без видеорекламы" },
-  { icon: "Unlock", label: "Ранний доступ", desc: "Новые скины и режимы первым" },
+  { icon: "BanIcon",    label: "Без рекламы",       desc: "Никаких баннеров и прерываний во время игры" },
+  { icon: "BarChart3",  label: "Анализ матчей",      desc: "Показывает решающий ход и где была допущена ошибка" },
+  { icon: "Map",        label: "Тепловая карта",     desc: "Статистика ходов по клеткам за все матчи" },
+  { icon: "BadgeCheck", label: "PRO-значок",         desc: "Эксклюзивная метка рядом с именем в рейтинге" },
+  { icon: "Zap",        label: "×2 монеты",          desc: "Удвоенный заработок за победы в PvP-режиме" },
+  { icon: "Unlock",     label: "Ранний доступ",      desc: "Новые скины и режимы — раньше остальных" },
 ];
 
 const plans = [
-  {
-    id: "month",
-    name: "Месяц",
-    price: "199 ₽",
-    per: "/ месяц",
-    save: "",
-    popular: false,
-  },
-  {
-    id: "quarter",
-    name: "3 месяца",
-    price: "449 ₽",
-    per: "/ 3 мес",
-    save: "Экономия 25%",
-    popular: true,
-  },
-  {
-    id: "year",
-    name: "Год",
-    price: "1 490 ₽",
-    per: "/ год",
-    save: "Экономия 38%",
-    popular: false,
-  },
+  { id: "month",   name: "Месяц",    price: "199 ₽",   sub: "в месяц",   save: "",          popular: false },
+  { id: "quarter", name: "3 месяца", price: "449 ₽",   sub: "за 3 мес",  save: "−25%",     popular: true  },
+  { id: "year",    name: "Год",      price: "1 490 ₽", sub: "в год",     save: "−38%",     popular: false },
+];
+
+const comparison = [
+  ["Игры с ботом",       true,  true ],
+  ["PvP-матчи",          true,  true ],
+  ["Базовые скины",      true,  true ],
+  ["Реклама",            "Да",  "Нет"],
+  ["Анализ матчей",      false, true ],
+  ["Тепловая карта",     false, true ],
+  ["PRO-значок",         false, true ],
+  ["×2 монеты за победу",false, true ],
 ];
 
 const faq = [
-  { q: "Могу ли я отменить подписку?", a: "Да, в любой момент через личный кабинет. Доступ сохраняется до конца оплаченного периода." },
-  { q: "Что случится с PRO-скинами после отмены?", a: "Скины, купленные за монеты, остаются навсегда. Эксклюзивный PRO-значок скрывается." },
-  { q: "Есть ли пробный период?", a: "Да — 7 дней бесплатно для новых пользователей при первой подписке." },
+  { q: "Можно ли отменить подписку?", a: "Да, в любой момент. Доступ сохраняется до конца оплаченного периода." },
+  { q: "Что случится со скинами?",    a: "Скины, купленные за монеты, остаются навсегда. PRO-значок скрывается при отмене." },
+  { q: "Есть ли пробный период?",     a: "7 дней бесплатно для новых пользователей при первой подписке." },
 ];
 
 export default function ProPage() {
   return (
-    <div className="min-h-screen pt-20 pb-16 px-4">
+    <div className="min-h-screen pt-20 pb-16 px-5">
       <div className="max-w-4xl mx-auto">
 
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/20 via-primary/8 to-transparent border border-primary/20 p-10 text-center mb-12 animate-fade-in">
-          <div className="absolute inset-0 bg-grid opacity-30" />
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 bg-primary/20 gold-text border border-primary/30 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
-              <Icon name="Star" size={13} />
-              PRO-Игрок
-            </div>
-            <h1 className="font-display text-5xl lg:text-6xl font-bold uppercase mb-4">
-              Раскрой<br /><span className="gold-text">полный потенциал</span>
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-md mx-auto">
-              Отключи рекламу, получи глубокую аналитику и выдели себя среди тысяч игроков.
-            </p>
+        <div className="py-16 border-b border-border mb-14 animate-fade-in">
+          <div className="inline-flex items-center gap-2 border border-border rounded-full px-3 py-1 text-xs font-bold text-muted-foreground mb-8 uppercase tracking-widest">
+            <Icon name="Star" size={11} className="cream" />
+            PRO-Игрок
           </div>
+          <h1 className="font-black text-5xl lg:text-6xl tracking-tight leading-[0.93] mb-5">
+            Раскрой<br /><span className="cream">полный потенциал</span>
+          </h1>
+          <p className="text-muted-foreground text-base font-medium max-w-md leading-relaxed">
+            Отключи рекламу, получи глубокую аналитику и выдели себя среди тысяч игроков.
+          </p>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+        {/* Features */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-16">
           {features.map((f, i) => (
-            <div
-              key={i}
-              className="glass-card rounded-2xl p-5 flex gap-4 border border-border hover:border-primary/30 transition-all animate-fade-in"
-              style={{ animationDelay: `${i * 0.07}s` }}
-            >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center gold-text flex-shrink-0 mt-0.5">
-                <Icon name={f.icon} size={20} />
+            <div key={i} className="card-premium p-5 flex gap-4 animate-fade-in" style={{ animationDelay: `${i * 0.07}s` }}>
+              <div className="w-9 h-9 rounded-lg bg-surface-2 border border-border flex items-center justify-center cream shrink-0 mt-0.5">
+                <Icon name={f.icon} size={16} />
               </div>
               <div>
-                <div className="font-semibold mb-1">{f.label}</div>
-                <div className="text-muted-foreground text-sm">{f.desc}</div>
+                <div className="font-bold text-sm mb-1">{f.label}</div>
+                <div className="text-muted-foreground text-xs leading-relaxed font-medium">{f.desc}</div>
               </div>
             </div>
           ))}
         </div>
 
         {/* Plans */}
-        <div className="text-center mb-8 animate-fade-in">
-          <h2 className="font-display text-3xl font-bold uppercase">Выбери план</h2>
-          <p className="text-muted-foreground mt-2 text-sm">7 дней бесплатно · Отмена в любой момент</p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-4 mb-12">
-          {plans.map((plan, i) => (
-            <div
-              key={plan.id}
-              className={`relative glass-card rounded-2xl p-6 flex flex-col gap-4 border transition-all animate-fade-in
-                ${plan.popular ? "border-primary/50 bg-primary/5 scale-[1.02]" : "border-border"}
-              `}
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
-                  Лучший выбор
-                </div>
-              )}
-              <div>
-                <div className="font-display font-bold uppercase text-sm text-muted-foreground mb-1">{plan.name}</div>
-                <div className="font-display font-bold text-4xl">{plan.price}</div>
-                <div className="text-muted-foreground text-xs">{plan.per}</div>
-              </div>
-              {plan.save && (
-                <div className="bg-green-900/30 text-green-400 text-xs font-bold px-3 py-1.5 rounded-lg w-fit">
-                  {plan.save}
-                </div>
-              )}
-              <button className={`mt-auto w-full py-3 rounded-xl font-display font-bold uppercase tracking-wider transition-all
-                ${plan.popular ? "bg-primary text-primary-foreground hover:opacity-90" : "border border-border hover:bg-secondary text-foreground"}
-              `}>
-                Начать
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Comparison Table */}
-        <div className="glass-card rounded-2xl overflow-hidden mb-12 animate-fade-in">
-          <div className="grid grid-cols-3 bg-secondary/50 px-6 py-3 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-            <div className="col-span-1">Функция</div>
-            <div className="text-center">Бесплатно</div>
-            <div className="text-center gold-text">PRO</div>
+        <div className="mb-14">
+          <div className="mb-8">
+            <h2 className="font-black text-3xl tracking-tight mb-2">Выбери план</h2>
+            <p className="text-muted-foreground text-sm font-medium">7 дней бесплатно · Отмена в любой момент</p>
           </div>
-          {[
-            ["Игры с ботом", true, true],
-            ["PvP матчи", true, true],
-            ["Базовые скины", true, true],
-            ["Реклама", "Да", "Нет"],
-            ["Аналитика матчей", false, true],
-            ["Тепловая карта", false, true],
-            ["PRO-значок", false, true],
-            ["×2 монеты", false, true],
-          ].map(([feat, free, pro], i) => (
-            <div key={i} className="grid grid-cols-3 px-6 py-3.5 border-t border-border items-center">
-              <div className="text-sm">{feat as string}</div>
-              <div className="text-center text-sm">
-                {typeof free === "boolean"
-                  ? <Icon name={free ? "Check" : "X"} size={16} className={`mx-auto ${free ? "text-green-400" : "text-muted-foreground"}`} />
-                  : <span className={free === "Нет" ? "text-red-400 text-xs" : "text-muted-foreground text-xs"}>{free as string}</span>
-                }
+          <div className="grid md:grid-cols-3 gap-3">
+            {plans.map((plan, i) => (
+              <div
+                key={plan.id}
+                className={`card-premium p-6 flex flex-col gap-5 relative animate-fade-in
+                  ${plan.popular ? "border-cream/30 bg-cream-subtle" : ""}
+                `}
+                style={{ animationDelay: `${i * 0.09}s` }}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-2.5 left-5 badge-cream">Лучший выбор</div>
+                )}
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">{plan.name}</div>
+                  <div className="font-black text-4xl tracking-tight">{plan.price}</div>
+                  <div className="text-muted-foreground text-xs font-medium mt-0.5">{plan.sub}</div>
+                </div>
+                {plan.save && (
+                  <div className="text-xs font-bold text-green-400 bg-green-950/40 border border-green-900/40 px-3 py-1.5 rounded w-fit">
+                    {plan.save}
+                  </div>
+                )}
+                <button className={`mt-auto w-full py-3 rounded-lg font-bold text-sm tracking-wide transition-all
+                  ${plan.popular ? "btn-cream" : "btn-ghost"}
+                `}>
+                  Начать
+                </button>
               </div>
-              <div className="text-center text-sm">
-                {typeof pro === "boolean"
-                  ? <Icon name={pro ? "Check" : "X"} size={16} className={`mx-auto ${pro ? "gold-text" : "text-muted-foreground"}`} />
-                  : <span className={pro === "Нет" ? "text-green-400 text-xs font-semibold" : "text-muted-foreground text-xs"}>{pro as string}</span>
-                }
-              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Comparison */}
+        <div className="mb-14 animate-fade-in">
+          <h2 className="font-black text-2xl tracking-tight mb-6">Сравнение планов</h2>
+          <div className="card-premium overflow-hidden">
+            <div className="grid grid-cols-3 px-5 py-3 border-b border-border bg-surface-2">
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Функция</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground text-center">Бесплатно</div>
+              <div className="text-xs font-bold uppercase tracking-widest cream text-center">PRO</div>
             </div>
-          ))}
+            <div className="divide-y divide-border">
+              {comparison.map(([feat, free, pro], i) => (
+                <div key={i} className="grid grid-cols-3 px-5 py-3.5 items-center">
+                  <div className="text-sm font-medium">{feat as string}</div>
+                  <div className="flex justify-center">
+                    {typeof free === "boolean"
+                      ? <Icon name={free ? "Check" : "Minus"} size={15} className={free ? "text-green-400" : "text-muted-foreground"} />
+                      : <span className={`text-xs font-semibold ${free === "Нет" ? "text-red-400" : "text-muted-foreground"}`}>{free as string}</span>
+                    }
+                  </div>
+                  <div className="flex justify-center">
+                    {typeof pro === "boolean"
+                      ? <Icon name={pro ? "Check" : "Minus"} size={15} className={pro ? "cream" : "text-muted-foreground"} />
+                      : <span className={`text-xs font-semibold ${pro === "Нет" ? "text-green-400" : "text-muted-foreground"}`}>{pro as string}</span>
+                    }
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* FAQ */}
         <div className="animate-fade-in">
-          <h2 className="font-display text-2xl font-bold uppercase mb-6 text-center">Частые вопросы</h2>
-          <div className="flex flex-col gap-3">
+          <h2 className="font-black text-2xl tracking-tight mb-6">Частые вопросы</h2>
+          <div className="flex flex-col gap-2">
             {faq.map((item, i) => (
-              <div key={i} className="glass-card rounded-xl p-5 border border-border">
-                <div className="font-semibold mb-2">{item.q}</div>
-                <div className="text-muted-foreground text-sm">{item.a}</div>
+              <div key={i} className="card-premium p-5">
+                <div className="font-bold text-sm mb-2">{item.q}</div>
+                <div className="text-muted-foreground text-sm font-medium leading-relaxed">{item.a}</div>
               </div>
             ))}
           </div>
