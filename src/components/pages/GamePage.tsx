@@ -202,7 +202,7 @@ export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
           <span className="text-muted-foreground text-xs font-bold">VS</span>
 
           <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all border
-            ${turn === "O" && status === "playing" ? "border-blue-400/30 bg-blue-950/20" : "border-transparent"}
+            ${turn === "O" && status === "playing" ? "border-blue/30 bg-blue-subtle" : "border-transparent"}
           `}>
             <span className="sym-o font-black text-lg mr-1">○</span>
             <div className="text-right">
@@ -218,25 +218,34 @@ export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
         {/* Board */}
         <div className="relative mb-6 animate-scale-in delay-150">
           <div className="grid grid-cols-3 gap-3 bg-card border border-border p-4 rounded-xl">
-            {board.map((cell, i) => (
-              <button
-                key={i}
-                onClick={() => (mode === "friend" || turn === "X") && makeMove(i)}
-                disabled={!!cell || status !== "playing" || (isAI && turn === "O")}
-                className={`h-24 sm:h-28 flex items-center justify-center rounded-lg border font-black text-5xl transition-all duration-200
-                  ${winLine.includes(i)
-                    ? "bg-cream-subtle border-cream/30 scale-[1.04]"
-                    : cell
-                      ? "bg-surface-2 border-border cursor-default"
-                      : "bg-secondary border-border hover:bg-surface-3 hover:border-muted-foreground/20 hover:scale-[1.02] active:scale-95"
-                  }
-                `}
-              >
-                {cell && (
-                  <span className={`${cell === "X" ? "sym-x" : "sym-o"} animate-scale-in`}>{cell}</span>
-                )}
-              </button>
-            ))}
+            {board.map((cell, i) => {
+              const isWin = winLine.includes(i);
+              return (
+                <button
+                  key={i}
+                  onClick={() => (mode === "friend" || turn === "X") && makeMove(i)}
+                  disabled={!!cell || status !== "playing" || (isAI && turn === "O")}
+                  className={`h-24 sm:h-28 flex items-center justify-center rounded-lg border font-black text-5xl transition-all duration-200 relative overflow-hidden
+                    ${isWin
+                      ? "bg-amber-subtle border-amber/40 scale-[1.05] cell-win"
+                      : cell === "X"
+                        ? "bg-surface-2 border-border cursor-default cell-flash-x"
+                        : cell === "O"
+                          ? "bg-surface-2 border-border cursor-default cell-flash-o"
+                          : "bg-secondary border-border hover:bg-surface-3 hover:border-muted-foreground/20 hover:scale-[1.02] active:scale-95"
+                    }
+                  `}
+                  style={isWin ? { borderColor: "hsl(32 95% 64% / 0.4)", background: "hsl(32 40% 16%)" } : undefined}
+                >
+                  {cell === "X" && (
+                    <span className="sym-x sym-x-animate select-none">×</span>
+                  )}
+                  {cell === "O" && (
+                    <span className="sym-o sym-o-animate select-none">○</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -250,7 +259,7 @@ export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
                   Бот думает...
                 </span>
               ) : (
-                <span>Ход: <span className={turn === "X" ? "cream font-bold" : "text-blue-400 font-bold"}>{turn === "X" ? "Вы (×)" : isAI ? "Бот (○)" : "Соперник (○)"}</span></span>
+                <span>Ход: <span className={turn === "X" ? "cream font-bold" : "text-blue-sym font-bold"}>{turn === "X" ? "Вы (×)" : isAI ? "Бот (○)" : "Соперник (○)"}</span></span>
               )}
             </div>
           )}

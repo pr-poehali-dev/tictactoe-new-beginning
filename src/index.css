@@ -4,43 +4,46 @@
 
 @layer base {
   :root {
-    /* Тёмный премиум: почти чёрный фон, кремово-бежевые акценты */
-    --background: 0 0% 5%;
-    --foreground: 36 20% 90%;
+    /* Тёмный, но живой: тёплый тёмно-серый фон + насыщенные акценты */
+    --background: 222 18% 10%;
+    --foreground: 210 20% 93%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 36 20% 90%;
+    --card: 222 16% 13%;
+    --card-foreground: 210 20% 93%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 36 20% 90%;
+    --popover: 222 16% 13%;
+    --popover-foreground: 210 20% 93%;
 
-    --primary: 36 60% 75%;
-    --primary-foreground: 0 0% 5%;
+    --primary: 32 95% 64%;
+    --primary-foreground: 222 18% 10%;
 
-    --secondary: 0 0% 11%;
-    --secondary-foreground: 36 20% 90%;
+    --secondary: 222 14% 17%;
+    --secondary-foreground: 210 20% 93%;
 
-    --muted: 0 0% 11%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 222 14% 17%;
+    --muted-foreground: 220 10% 50%;
 
-    --accent: 36 60% 75%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 32 95% 64%;
+    --accent-foreground: 222 18% 10%;
 
-    --destructive: 0 65% 55%;
-    --destructive-foreground: 36 20% 90%;
+    --destructive: 0 70% 58%;
+    --destructive-foreground: 210 20% 93%;
 
-    --border: 0 0% 13%;
-    --input: 0 0% 13%;
-    --ring: 36 60% 75%;
+    --border: 222 14% 20%;
+    --input: 222 14% 20%;
+    --ring: 32 95% 64%;
 
     --radius: 0.5rem;
 
-    --cream: 36 60% 75%;
-    --cream-dim: 36 30% 55%;
-    --cream-subtle: 36 15% 15%;
-    --surface: 0 0% 8%;
-    --surface-2: 0 0% 11%;
-    --surface-3: 0 0% 14%;
+    /* Кастомные переменные */
+    --amber: 32 95% 64%;
+    --amber-dim: 32 60% 50%;
+    --amber-subtle: 32 40% 16%;
+    --blue: 210 85% 68%;
+    --blue-subtle: 210 50% 14%;
+    --surface: 222 16% 13%;
+    --surface-2: 222 14% 17%;
+    --surface-3: 222 14% 21%;
   }
 }
 
@@ -72,10 +75,10 @@
 
 @layer utilities {
   .cream {
-    color: hsl(var(--cream));
+    color: hsl(var(--amber));
   }
   .cream-dim {
-    color: hsl(var(--cream-dim));
+    color: hsl(var(--amber-dim));
   }
   .bg-surface {
     background: hsl(var(--surface));
@@ -87,14 +90,20 @@
     background: hsl(var(--surface-3));
   }
   .bg-cream-subtle {
-    background: hsl(var(--cream-subtle));
+    background: hsl(var(--amber-subtle));
+  }
+  .bg-blue-subtle {
+    background: hsl(var(--blue-subtle));
+  }
+  .text-blue-sym {
+    color: hsl(var(--blue));
   }
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-105;
   }
 }
 
-/* ─── Анимации ─── */
+/* ─── Анимации страниц ─── */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -123,14 +132,6 @@
   to {
     opacity: 1;
     transform: translateX(0);
-  }
-}
-@keyframes shimmer {
-  0% {
-    background-position: -400px 0;
-  }
-  100% {
-    background-position: 400px 0;
   }
 }
 
@@ -166,6 +167,83 @@
   animation-delay: 0.5s;
 }
 
+/* ─── Анимации символов на игровом поле ─── */
+@keyframes sym-x-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-20deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.18) rotate(4deg);
+  }
+  80% {
+    transform: scale(0.94) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+@keyframes sym-o-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+  75% {
+    transform: scale(0.93);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes cell-flash-x {
+  0% {
+    background: hsl(var(--amber-subtle));
+  }
+  100% {
+    background: transparent;
+  }
+}
+@keyframes cell-flash-o {
+  0% {
+    background: hsl(var(--blue-subtle));
+  }
+  100% {
+    background: transparent;
+  }
+}
+@keyframes win-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 hsla(32, 95%, 64%, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 6px hsla(32, 95%, 64%, 0);
+  }
+}
+
+.sym-x-animate {
+  animation: sym-x-in 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.sym-o-animate {
+  animation: sym-o-in 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.cell-flash-x {
+  animation: cell-flash-x 0.5s ease-out forwards;
+}
+.cell-flash-o {
+  animation: cell-flash-o 0.5s ease-out forwards;
+}
+.cell-win {
+  animation: win-pulse 1.4s ease infinite;
+}
+
 /* ─── Карточка ─── */
 .card-premium {
   background: hsl(var(--card));
@@ -174,21 +252,26 @@
   transition: border-color 0.2s;
 }
 .card-premium:hover {
-  border-color: hsl(0 0% 20%);
+  border-color: hsl(222 14% 27%);
 }
 
 /* ─── Кнопки ─── */
 .btn-cream {
-  background: hsl(var(--cream));
-  color: hsl(0 0% 5%);
+  background: hsl(var(--amber));
+  color: hsl(222 18% 10%);
   font-family: "Montserrat", sans-serif;
   font-weight: 700;
   letter-spacing: 0.03em;
-  transition: opacity 0.15s;
+  transition:
+    opacity 0.15s,
+    transform 0.1s;
   border-radius: 8px;
 }
 .btn-cream:hover {
-  opacity: 0.85;
+  opacity: 0.88;
+}
+.btn-cream:active {
+  transform: scale(0.97);
 }
 
 .btn-ghost {
@@ -203,24 +286,24 @@
   border-radius: 8px;
 }
 .btn-ghost:hover {
-  border-color: hsl(0 0% 28%);
+  border-color: hsl(222 14% 32%);
   background: hsl(var(--surface-2));
 }
 
 /* ─── Символы X / O ─── */
 .sym-x {
-  color: hsl(var(--cream));
+  color: hsl(var(--amber));
   font-weight: 800;
 }
 .sym-o {
-  color: hsl(210 80% 72%);
+  color: hsl(var(--blue));
   font-weight: 800;
 }
 
 /* ─── Бейджи ─── */
 .badge-cream {
-  background: hsl(var(--cream-subtle));
-  color: hsl(var(--cream));
+  background: hsl(var(--amber-subtle));
+  color: hsl(var(--amber));
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -229,8 +312,8 @@
   text-transform: uppercase;
 }
 .badge-muted {
-  background: hsl(0 0% 12%);
-  color: hsl(0 0% 42%);
+  background: hsl(222 14% 15%);
+  color: hsl(220 10% 44%);
   font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -247,14 +330,9 @@
   background: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 16%);
+  background: hsl(222 14% 22%);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(0 0% 25%);
-}
-
-/* ─── Тонкая линия сверху (декор навигации) ─── */
-.nav-top-line {
-  border-top: 1px solid hsl(var(--border));
+  background: hsl(222 14% 30%);
 }
