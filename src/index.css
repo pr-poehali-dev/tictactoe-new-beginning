@@ -4,33 +4,39 @@
 
 @layer base {
   :root {
-    /* Приглушённый тёмно-синий фон */
-    --background: 222 35% 8%;
-    --foreground: 210 20% 93%;
+    /*
+      Палитра из логотипа Laserdesign:
+      фон        → тёмный индиго   #1a1f3c  (230 38% 17% → темнее: 230 45% 10%)
+      карточки   → роял-синий тёмный #1e2a5e → (227 50% 25%)
+      акцент-синий → стальной яркий #2d6abf  (214 62% 46%)
+      бордер     → #253070          (228 48% 29%)
+    */
+    --background: 230 45% 9%;
+    --foreground: 210 25% 93%;
 
-    --card: 222 30% 11%;
-    --card-foreground: 210 20% 93%;
+    --card: 228 42% 13%;
+    --card-foreground: 210 25% 93%;
 
-    --popover: 222 30% 11%;
-    --popover-foreground: 210 20% 93%;
+    --popover: 228 42% 13%;
+    --popover-foreground: 210 25% 93%;
 
     --primary: 32 95% 64%;
-    --primary-foreground: 222 35% 8%;
+    --primary-foreground: 230 45% 9%;
 
-    --secondary: 222 28% 15%;
-    --secondary-foreground: 210 20% 93%;
+    --secondary: 228 38% 17%;
+    --secondary-foreground: 210 25% 93%;
 
-    --muted: 222 28% 15%;
-    --muted-foreground: 220 15% 50%;
+    --muted: 228 38% 17%;
+    --muted-foreground: 220 20% 52%;
 
     --accent: 32 95% 64%;
-    --accent-foreground: 222 35% 8%;
+    --accent-foreground: 230 45% 9%;
 
     --destructive: 0 70% 58%;
-    --destructive-foreground: 210 20% 93%;
+    --destructive-foreground: 210 25% 93%;
 
-    --border: 222 25% 18%;
-    --input: 222 25% 18%;
+    --border: 228 40% 20%;
+    --input: 228 40% 20%;
     --ring: 32 95% 64%;
 
     --radius: 0.5rem;
@@ -39,11 +45,11 @@
     --amber: 32 95% 64%;
     --amber-dim: 32 60% 50%;
     --amber-subtle: 32 35% 14%;
-    --blue: 210 85% 68%;
-    --blue-subtle: 215 45% 14%;
-    --surface: 222 30% 11%;
-    --surface-2: 222 28% 15%;
-    --surface-3: 222 26% 19%;
+    --blue: 214 70% 62%;
+    --blue-subtle: 225 48% 18%;
+    --surface: 228 42% 13%;
+    --surface-2: 228 38% 17%;
+    --surface-3: 228 36% 22%;
   }
 }
 
@@ -252,7 +258,7 @@
   transition: border-color 0.2s;
 }
 .card-premium:hover {
-  border-color: hsl(222 25% 26%);
+  border-color: hsl(228 40% 28%);
 }
 
 /* ─── Кнопки ─── */
@@ -286,7 +292,7 @@
   border-radius: 8px;
 }
 .btn-ghost:hover {
-  border-color: hsl(222 25% 30%);
+  border-color: hsl(228 40% 30%);
   background: hsl(var(--surface-2));
 }
 
