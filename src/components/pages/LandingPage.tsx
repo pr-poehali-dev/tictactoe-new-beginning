@@ -23,15 +23,10 @@ const navLinks: { label: string; page: Page | null }[] = [
   { label: "ПРОФИЛЬ",   page: "dashboard" },
 ];
 
-const bottomTabs = [
-  { icon: "Users",      label: "Друзья" },
-  { icon: "Newspaper",  label: "Новости" },
-  { icon: "MessageCircle", label: "Чат" },
-];
+
 
 export default function LandingPage({ navigate, onLoginClick, onRegisterClick }: LandingPageProps) {
   const [activeNav, setActiveNav] = useState(0);
-  const [activeTab, setActiveTab] = useState(0);
   const [matchCount, setMatchCount] = useState(1420);
   const [onlineCount, setOnlineCount] = useState(5689);
 
@@ -105,24 +100,6 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
       {/* ─── MAIN CONTENT ─── */}
       <div className="flex flex-1 gap-4 px-4 py-4 max-w-[1400px] mx-auto w-full">
 
-        {/* Left sidebar — quick actions */}
-        <div className="hidden lg:flex flex-col gap-2 mt-8">
-          {[
-            { icon: "X",           color: "#f04d6a" },
-            { icon: "RefreshCw",   color: "#4dd9f0" },
-            { icon: "Shield",      color: "#4dd9f0" },
-            { icon: "Users",       color: "#4dd9f0" },
-          ].map((item, i) => (
-            <button
-              key={i}
-              className="w-10 h-10 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-            >
-              <Icon name={item.icon} size={16} style={{ color: item.color }} />
-            </button>
-          ))}
-        </div>
-
         {/* ─── HERO CARD ─── */}
         <div className="flex-1 relative rounded-2xl overflow-hidden min-h-[480px]"
           style={{
@@ -150,20 +127,6 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
           </div>
 
           <div className="flex flex-col md:flex-row items-center h-full p-6 md:p-10 gap-8">
-            {/* Game image */}
-            <div className="flex-1 flex items-center justify-center">
-              <div className="relative">
-                <img
-                  src="https://cdn.poehali.dev/projects/dfe95798-d875-4edf-a02d-60a24f7901f2/bucket/fb9e95d9-71a5-49ea-905e-e47fe9f2740f.png"
-                  alt="Крестики-нолики"
-                  className="w-72 md:w-96 object-contain animate-fade-in"
-                  style={{
-                    filter: "drop-shadow(0 0 30px rgba(77,217,240,0.4))",
-                    clipPath: "inset(0 57% 0 0)",
-                  }}
-                />
-              </div>
-            </div>
 
             {/* Hero text */}
             <div className="flex-1 flex flex-col items-start justify-center">
@@ -281,58 +244,7 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
         </div>
       </div>
 
-      {/* ─── BOTTOM BAR ─── */}
-      <div className="relative z-50 border-t flex items-center justify-between px-6 py-2"
-        style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,10,24,0.9)", backdropFilter: "blur(12px)" }}>
 
-        {/* Prev/Next */}
-        <div className="flex items-center gap-2">
-          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <Icon name="ChevronLeft" size={16} style={{ color: "rgba(180,200,240,0.6)" }} />
-          </button>
-          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
-            style={{ background: "rgba(77,217,240,0.12)", border: "1px solid rgba(77,217,240,0.25)" }}>
-            <Icon name="Gamepad2" size={16} style={{ color: "#4dd9f0" }} />
-          </button>
-          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <Icon name="ChevronRight" size={16} style={{ color: "rgba(180,200,240,0.6)" }} />
-          </button>
-        </div>
-
-        {/* Bottom tabs */}
-        <div className="flex items-center gap-6">
-          {bottomTabs.map((tab, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveTab(i)}
-              className="flex flex-col items-center gap-0.5 px-3 py-1 transition-all"
-            >
-              <Icon name={tab.icon} size={18} style={{
-                color: activeTab === i ? "#4dd9f0" : "rgba(180,200,240,0.4)",
-                filter: activeTab === i ? "drop-shadow(0 0 6px #4dd9f0)" : "none",
-              }} />
-              <span className="text-[10px] font-bold tracking-widest" style={{
-                color: activeTab === i ? "#4dd9f0" : "rgba(180,200,240,0.4)",
-              }}>{tab.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Play button */}
-        <button
-          onClick={() => navigate("game")}
-          className="px-6 py-2 rounded font-black text-xs tracking-widest transition-all hover:scale-105"
-          style={{
-            background: "linear-gradient(90deg,#4dd9f0,#2a7fb8)",
-            color: "#0a0c1e",
-            boxShadow: "0 0 16px rgba(77,217,240,0.3)",
-          }}
-        >
-          ИГРАТЬ
-        </button>
-      </div>
 
     </div>
   );
