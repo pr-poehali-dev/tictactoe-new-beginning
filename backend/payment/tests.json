@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "create without token",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "create", "package_id": "coins_100"},
+      "expectedStatus": 401
+    },
+    {
+      "name": "webhook ping",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "webhook", "event": "payment.waiting_for_capture"},
+      "expectedStatus": 200
+    }
+  ]
+}

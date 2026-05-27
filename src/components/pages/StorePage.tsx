@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
+import func2url from "../../backend/func2url.json";
+
+const PAYMENT_URL = func2url.payment;
 
 interface StorePageProps {
   coins: number;
@@ -8,54 +11,156 @@ interface StorePageProps {
 
 type Tab = "skins" | "boards" | "avatars" | "topup";
 
+const PACKAGES = [
+  {
+    id: "coins_100",
+    coins: 100,
+    totalCoins: 100,
+    rub: 99,
+    bonus: "",
+    popular: false,
+  },
+  {
+    id: "coins_500",
+    coins: 500,
+    totalCoins: 550,
+    rub: 399,
+    bonus: "+50 в подарок",
+    popular: true,
+  },
+  {
+    id: "coins_1500",
+    coins: 1500,
+    totalCoins: 1800,
+    rub: 999,
+    bonus: "+300 в подарок",
+    popular: false,
+  },
+];
+
 const skins = [
-  { id: 1, name: "Деревянный", sym: "✕", symO: "○", cX: "#c8a96e", cO: "#8fa8b8", free: true,  price: 0,   tag: "free",  owned: true  },
-  { id: 2, name: "Карандаш",   sym: "✗", symO: "◯", cX: "#d4cfc0", cO: "#a0b4c0", free: true,  price: 0,   tag: "free",  owned: false },
-  { id: 3, name: "Неоновый",   sym: "×", symO: "○", cX: "#d4a96a", cO: "#7ab3e0", free: false, price: 120, tag: "hit",   owned: false },
-  { id: 4, name: "Стимпанк",   sym: "⚙", symO: "⬡", cX: "#c8955a", cO: "#8fa8b8", free: false, price: 200, tag: "",      owned: false },
-  { id: 5, name: "Кристалл",   sym: "◈", symO: "◇", cX: "#9eb8cc", cO: "#d4c49a", free: false, price: 180, tag: "new",   owned: false },
-  { id: 6, name: "Огонь",      sym: "✦", symO: "✧", cX: "#cc8855", cO: "#7a9dbf", free: false, price: 250, tag: "",      owned: false },
-  { id: 7, name: "Тень",       sym: "▲", symO: "▽", cX: "#a090c0", cO: "#90a8c0", free: false, price: 300, tag: "prem",  owned: false },
-  { id: 8, name: "Меч & Щит", sym: "⚔", symO: "🛡", cX: "#e0ddd5", cO: "#8fa8b8", free: false, price: 500, tag: "anim",  owned: false },
+  { id: 1, name: "Деревянный", sym: "✕", symO: "○", cX: "#c8a96e", cO: "#8fa8b8", price: 0,   tag: "free" },
+  { id: 2, name: "Карандаш",   sym: "✗", symO: "◯", cX: "#d4cfc0", cO: "#a0b4c0", price: 0,   tag: "free" },
+  { id: 3, name: "Неоновый",   sym: "×", symO: "○", cX: "#d4a96a", cO: "#7ab3e0", price: 120, tag: "hit"  },
+  { id: 4, name: "Стимпанк",   sym: "⚙", symO: "⬡", cX: "#c8955a", cO: "#8fa8b8", price: 200, tag: ""    },
+  { id: 5, name: "Кристалл",   sym: "◈", symO: "◇", cX: "#9eb8cc", cO: "#d4c49a", price: 180, tag: "new" },
+  { id: 6, name: "Огонь",      sym: "✦", symO: "✧", cX: "#cc8855", cO: "#7a9dbf", price: 250, tag: ""    },
+  { id: 7, name: "Тень",       sym: "▲", symO: "▽", cX: "#a090c0", cO: "#90a8c0", price: 300, tag: "prem"},
+  { id: 8, name: "Меч & Щит",  sym: "⚔", symO: "🛡", cX: "#e0ddd5", cO: "#8fa8b8", price: 500, tag: "anim"},
 ];
 
 const boards = [
-  { id: 1, name: "Классика",  desc: "Минималистичное поле",     price: 0,   owned: true,  color: "#c8a96e" },
-  { id: 2, name: "Мрамор",    desc: "Тёмный полированный камень",price: 150, owned: false, color: "#94a3b8" },
-  { id: 3, name: "Галактика", desc: "Звёздное космическое поле", price: 280, owned: false, color: "#818cf8" },
-  { id: 4, name: "Лес",       desc: "Зелёная природа",          price: 200, owned: false, color: "#4ade80" },
-];
-
-const topup = [
-  { coins: 100,  price: "59 ₽",    bonus: "",              popular: false },
-  { coins: 500,  price: "249 ₽",   bonus: "+50 в подарок", popular: true  },
-  { coins: 1500, price: "699 ₽",   bonus: "+300 в подарок",popular: false },
+  { id: 1, name: "Классика",  desc: "Минималистичное поле",      price: 0,   color: "#c8a96e" },
+  { id: 2, name: "Мрамор",    desc: "Тёмный полированный камень", price: 150, color: "#94a3b8" },
+  { id: 3, name: "Галактика", desc: "Звёздное космическое поле",  price: 280, color: "#818cf8" },
+  { id: 4, name: "Лес",       desc: "Зелёная природа",           price: 200, color: "#4ade80" },
 ];
 
 const tabs: { id: Tab; label: string; icon: string }[] = [
-  { id: "skins",  label: "Скины",    icon: "Sparkles" },
-  { id: "boards", label: "Поля",     icon: "Grid3X3"  },
+  { id: "skins",  label: "Скины",    icon: "Sparkles"   },
+  { id: "boards", label: "Поля",     icon: "Grid3X3"    },
   { id: "avatars",label: "Аватары",  icon: "UserCircle" },
-  { id: "topup",  label: "Пополнить",icon: "Coins"    },
+  { id: "topup",  label: "Пополнить",icon: "Coins"      },
 ];
 
 export default function StorePage({ coins, setCoins }: StorePageProps) {
-  const [tab, setTab] = useState<Tab>("skins");
-  const [selected, setSelected] = useState(1);
-  const [ownedSkins, setOwnedSkins] = useState([1]);
+  const [tab, setTab]               = useState<Tab>("skins");
+  const [selected, setSelected]     = useState(1);
+  const [ownedSkins, setOwnedSkins] = useState([1, 2]);
   const [ownedBoards, setOwnedBoards] = useState([1]);
-  const [notif, setNotif] = useState("");
+  const [notif, setNotif]           = useState("");
+  const [notifType, setNotifType]   = useState<"ok" | "err">("ok");
 
-  const toast = (msg: string) => { setNotif(msg); setTimeout(() => setNotif(""), 2200); };
+  // Состояние оплаты
+  const [paying, setPaying]               = useState<string | null>(null);
+  const [pendingPaymentId, setPendingPaymentId] = useState<number | null>(null);
+  const [checkingPayment, setCheckingPayment]   = useState(false);
+
+  const toast = (msg: string, type: "ok" | "err" = "ok") => {
+    setNotif(msg); setNotifType(type);
+    setTimeout(() => setNotif(""), 3000);
+  };
 
   const buySkin = (skin: typeof skins[0]) => {
-    if (ownedSkins.includes(skin.id)) return toast("Уже куплено");
-    if (skin.free) { setOwnedSkins(p => [...p, skin.id]); return toast("Получен!"); }
-    if (coins < skin.price) return toast("Недостаточно монет");
+    if (ownedSkins.includes(skin.id)) return toast("Уже в коллекции");
+    if (skin.price === 0) { setOwnedSkins(p => [...p, skin.id]); return toast("Скин получен!"); }
+    if (coins < skin.price) return toast("Недостаточно монет — пополни баланс", "err");
     setCoins(coins - skin.price);
     setOwnedSkins(p => [...p, skin.id]);
     toast(`«${skin.name}» куплен`);
   };
+
+  const buyBoard = (board: typeof boards[0]) => {
+    if (ownedBoards.includes(board.id)) return;
+    if (coins < board.price) return toast("Недостаточно монет", "err");
+    setCoins(coins - board.price);
+    setOwnedBoards(p => [...p, board.id]);
+    toast(`«${board.name}» куплено`);
+  };
+
+  const handleBuyCoins = async (pkg: typeof PACKAGES[0]) => {
+    const token = localStorage.getItem("xo_token");
+    if (!token) return toast("Войди в аккаунт, чтобы купить монеты", "err");
+
+    setPaying(pkg.id);
+    try {
+      const res = await fetch(PAYMENT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          action: "create",
+          package_id: pkg.id,
+          return_url: window.location.href,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Ошибка");
+
+      setPendingPaymentId(data.payment_id);
+      // Открываем страницу оплаты ЮKassa в новой вкладке
+      window.open(data.confirmation_url, "_blank");
+      toast("Страница оплаты открыта в новой вкладке");
+    } catch (e: unknown) {
+      toast(e instanceof Error ? e.message : "Ошибка создания платежа", "err");
+    } finally {
+      setPaying(null);
+    }
+  };
+
+  const checkPaymentStatus = async () => {
+    if (!pendingPaymentId) return;
+    const token = localStorage.getItem("xo_token");
+    if (!token) return;
+
+    setCheckingPayment(true);
+    try {
+      const res = await fetch(PAYMENT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ action: "status", payment_id: pendingPaymentId }),
+      });
+      const data = await res.json();
+      if (data.status === "paid") {
+        setCoins(data.user_coins);
+        setPendingPaymentId(null);
+        toast(`Оплата прошла! Монеты зачислены`);
+      } else {
+        toast("Платёж ещё не подтверждён — подожди немного", "err");
+      }
+    } catch {
+      toast("Ошибка проверки платежа", "err");
+    } finally {
+      setCheckingPayment(false);
+    }
+  };
+
+  // Автопроверка статуса при возврате на вкладку
+  useEffect(() => {
+    if (!pendingPaymentId) return;
+    const handler = () => { if (!document.hidden) checkPaymentStatus(); };
+    document.addEventListener("visibilitychange", handler);
+    return () => document.removeEventListener("visibilitychange", handler);
+  }, [pendingPaymentId]);
 
   return (
     <div className="min-h-screen pt-20 pb-16 px-5">
@@ -79,18 +184,32 @@ export default function StorePage({ coins, setCoins }: StorePageProps) {
           </div>
         </div>
 
+        {/* Баннер ожидающего платежа */}
+        {pendingPaymentId && (
+          <div className="mb-6 bg-cream-subtle border border-cream/25 rounded-xl p-4 flex items-center gap-4 animate-fade-in">
+            <div className="text-2xl">⏳</div>
+            <div className="flex-1">
+              <div className="font-bold text-sm">Ожидаем подтверждение оплаты</div>
+              <div className="text-xs text-muted-foreground font-medium">После оплаты нажми кнопку — монеты зачислятся мгновенно</div>
+            </div>
+            <button
+              onClick={checkPaymentStatus}
+              disabled={checkingPayment}
+              className="btn-cream text-xs px-4 py-2 shrink-0 disabled:opacity-60"
+            >
+              {checkingPayment ? "Проверяю..." : "Проверить оплату"}
+            </button>
+          </div>
+        )}
+
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-border pb-0 mb-6">
+        <div className="flex gap-1 border-b border-border mb-6">
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold tracking-wide transition-all border-b-2 -mb-px
-                ${tab === t.id
-                  ? "border-cream cream"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-                }
-              `}
+                ${tab === t.id ? "border-cream cream" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
               <Icon name={t.icon} size={13} />
               {t.label}
@@ -100,8 +219,12 @@ export default function StorePage({ coins, setCoins }: StorePageProps) {
 
         {/* Toast */}
         {notif && (
-          <div className="fixed top-16 right-4 z-50 bg-card border border-border px-4 py-2.5 rounded-lg animate-slide-in-right text-xs font-bold cream">
-            ✓ {notif}
+          <div className={`fixed top-16 right-4 z-50 border px-4 py-2.5 rounded-lg animate-slide-in-right text-xs font-bold
+            ${notifType === "ok"
+              ? "bg-card border-border cream"
+              : "bg-red-500/10 border-red-500/20 text-red-400"
+            }`}>
+            {notifType === "ok" ? "✓ " : "✕ "}{notif}
           </div>
         )}
 
@@ -115,19 +238,16 @@ export default function StorePage({ coins, setCoins }: StorePageProps) {
                 <div
                   key={skin.id}
                   className={`card-premium p-5 flex flex-col items-center gap-3 cursor-pointer transition-all duration-200 animate-fade-in
-                    ${active && owned ? "border-cream/40 bg-cream-subtle" : ""}
-                  `}
+                    ${active && owned ? "border-cream/40 bg-cream-subtle" : ""}`}
                   style={{ animationDelay: `${i * 0.05}s` }}
                   onClick={() => owned && setSelected(skin.id)}
                 >
-                  <div className="self-stretch flex justify-between items-start">
-                    <div className="w-5" />
+                  <div className="self-stretch flex justify-end items-start">
                     {skin.tag === "hit"  && <span className="badge-cream">ХИТ</span>}
-                                    {skin.tag === "new"  && <span className="badge-cream">НОВИНКА</span>}
+                    {skin.tag === "new"  && <span className="badge-cream">НОВИНКА</span>}
                     {skin.tag === "free" && <span className="badge-muted">БЕСПЛАТНО</span>}
                     {skin.tag === "prem" && <span className="badge-muted">ПРЕМИУМ</span>}
                     {skin.tag === "anim" && <span className="badge-cream">АНИМАЦИЯ</span>}
-                    {!skin.tag && <div />}
                   </div>
                   <div className="flex gap-3 text-4xl font-black">
                     <span style={{ color: skin.cX }}>{skin.sym}</span>
@@ -138,8 +258,7 @@ export default function StorePage({ coins, setCoins }: StorePageProps) {
                     <button
                       onClick={e => { e.stopPropagation(); setSelected(skin.id); }}
                       className={`w-full py-2 rounded text-xs font-bold transition-all
-                        ${active ? "bg-cream text-primary-foreground" : "bg-surface-2 text-muted-foreground hover:text-foreground"}
-                      `}
+                        ${active ? "bg-cream text-primary-foreground" : "bg-surface-2 text-muted-foreground hover:text-foreground"}`}
                     >
                       {active ? "✓ Выбрано" : "Выбрать"}
                     </button>
@@ -177,10 +296,7 @@ export default function StorePage({ coins, setCoins }: StorePageProps) {
                     <button className="btn-cream py-2 text-xs">✓ Активно</button>
                   ) : (
                     <button
-                      onClick={() => {
-                        if (coins < b.price) return toast("Недостаточно монет");
-                        setCoins(coins - b.price); setOwnedBoards(p => [...p, b.id]); toast(`«${b.name}» куплено`);
-                      }}
+                      onClick={() => buyBoard(b)}
                       className="btn-ghost py-2 text-xs flex items-center justify-center gap-1"
                     >
                       <span className="cream">⬡</span> {b.price}
@@ -204,34 +320,57 @@ export default function StorePage({ coins, setCoins }: StorePageProps) {
           </div>
         )}
 
-        {/* Topup */}
+        {/* Topup — реальная оплата */}
         {tab === "topup" && (
           <div className="max-w-md mx-auto">
             <p className="text-sm text-muted-foreground font-medium text-center mb-8">
-              Монеты — для скинов, стикеров и аватаров в магазине
+              Монеты нужны для скинов, ставок и турниров
             </p>
             <div className="flex flex-col gap-3">
-              {topup.map((pack, i) => (
+              {PACKAGES.map((pkg, i) => (
                 <div
-                  key={i}
-                  className={`card-premium p-5 flex items-center gap-4 animate-fade-in ${pack.popular ? "border-cream/25 bg-cream-subtle" : ""}`}
+                  key={pkg.id}
+                  className={`relative card-premium p-5 flex items-center gap-4 animate-fade-in
+                    ${pkg.popular ? "border-cream/30 bg-cream-subtle" : ""}`}
                   style={{ animationDelay: `${i * 0.09}s` }}
                 >
-                  {pack.popular && (
+                  {pkg.popular && (
                     <div className="absolute -top-2.5 left-5 badge-cream">Популярный</div>
                   )}
-                  <span className="cream font-black text-3xl">⬡</span>
+                  <span className="cream font-black text-3xl leading-none">⬡</span>
                   <div className="flex-1">
-                    <div className="font-black text-xl tracking-tight">{pack.coins} монет</div>
-                    {pack.bonus && <div className="text-xs font-semibold text-green-400">{pack.bonus}</div>}
+                    <div className="font-black text-xl tracking-tight">
+                      {pkg.totalCoins} монет
+                    </div>
+                    {pkg.bonus && (
+                      <div className="text-xs font-semibold text-green-400">{pkg.bonus}</div>
+                    )}
                   </div>
-                  <button className="btn-cream px-5 py-2.5 text-sm shrink-0">{pack.price}</button>
+                  <button
+                    onClick={() => handleBuyCoins(pkg)}
+                    disabled={paying === pkg.id}
+                    className="btn-cream px-5 py-2.5 text-sm shrink-0 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {paying === pkg.id && (
+                      <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    )}
+                    {pkg.rub} ₽
+                  </button>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-6 font-medium">
-              ЮKassa · Stripe · СБП
-            </p>
+
+            {/* Способы оплаты */}
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <Icon name="CreditCard" size={14} />
+                <span className="text-xs font-medium">Банковская карта · СБП · ЮMoney</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Icon name="Shield" size={12} />
+                <span className="text-xs font-medium">Безопасная оплата через ЮKassa</span>
+              </div>
+            </div>
           </div>
         )}
       </div>
