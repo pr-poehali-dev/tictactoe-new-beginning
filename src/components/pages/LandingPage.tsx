@@ -8,232 +8,332 @@ interface LandingPageProps {
   onRegisterClick: () => void;
 }
 
-const skins = [
-  { name: "Неоновый",  sym: "×", symO: "○", colorX: "#d4a96a", colorO: "#7ab3e0" },
-  { name: "Стимпанк",  sym: "⚙", symO: "⬡", colorX: "#c8955a", colorO: "#8fa8b8" },
-  { name: "Кристалл",  sym: "◈", symO: "◇", colorX: "#9eb8cc", colorO: "#d4c49a" },
-  { name: "Огонь",     sym: "✦", symO: "✧", colorX: "#cc8855", colorO: "#7a9dbf" },
-  { name: "Тень",      sym: "▲", symO: "▽", colorX: "#a090c0", colorO: "#90a8c0" },
+const topPlayers = [
+  { rank: 1, name: "VORTEX",   elo: 2840, badge: "🌀" },
+  { rank: 2, name: "NOVA",     elo: 2710, badge: "⚡" },
+  { rank: 3, name: "SPECTRUM", elo: 2685, badge: "🔮" },
 ];
 
-const features = [
-  { icon: "Bot",        title: "3 уровня ИИ",     desc: "Новичок, любитель и Минимакс — непобедимый эксперт" },
-  { icon: "Swords",     title: "PvP онлайн",       desc: "Рейтинговые матчи с таймером 15 секунд на ход" },
-  { icon: "Shield",     title: "Защита от читов",  desc: "Все расчёты на сервере — нечестная игра исключена" },
-  { icon: "TrendingUp", title: "Elo-рейтинг",      desc: "Сезонные таблицы, лиги и награды для лучших" },
+const navLinks: { label: string; page: Page | null }[] = [
+  { label: "ГЛАВНАЯ",   page: null },
+  { label: "РЕЖИМЫ",    page: "game" },
+  { label: "ТУРНИРЫ",   page: "pro" },
+  { label: "КЛАНЫ",     page: "about" },
+  { label: "МАГАЗИН",   page: "store" },
+  { label: "ПРОФИЛЬ",   page: "dashboard" },
 ];
 
-const demoBoard = ["×", "", "○", "", "×", "", "○", "", "×"];
-const WIN_CELLS = [0, 4, 8];
-
-const shopItems = [
-  { label: "Деревянный", price: "Бесплатно", tag: "free" },
-  { label: "Карандаш",   price: "Бесплатно", tag: "free" },
-  { label: "Неоновый",   price: "120 монет",  tag: "hit" },
-  { label: "Стимпанк",   price: "200 монет",  tag: "" },
-  { label: "Кристалл",   price: "180 монет",  tag: "new" },
-  { label: "Огонь",      price: "250 монет",  tag: "" },
-  { label: "Тень",       price: "300 монет",  tag: "premium" },
-  { label: "Меч & Щит", price: "500 монет",  tag: "anim" },
+const bottomTabs = [
+  { icon: "Users",      label: "Друзья" },
+  { icon: "Newspaper",  label: "Новости" },
+  { icon: "MessageCircle", label: "Чат" },
 ];
 
 export default function LandingPage({ navigate, onLoginClick, onRegisterClick }: LandingPageProps) {
-  const [skinIdx, setSkinIdx] = useState(0);
-  const [showWin, setShowWin] = useState(false);
+  const [activeNav, setActiveNav] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
+  const [matchCount, setMatchCount] = useState(1420);
+  const [onlineCount, setOnlineCount] = useState(5689);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowWin(true), 800);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    const t = setInterval(() => setSkinIdx(p => (p + 1) % skins.length), 3000);
+    const t = setInterval(() => {
+      setMatchCount(v => v + Math.floor(Math.random() * 3));
+      setOnlineCount(v => v + Math.floor(Math.random() * 5) - 2);
+    }, 2500);
     return () => clearInterval(t);
   }, []);
 
-  const skin = skins[skinIdx];
+  const handleNav = (idx: number, page: Page | null) => {
+    setActiveNav(idx);
+    if (page) navigate(page);
+  };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col overflow-hidden" style={{
+      background: "linear-gradient(160deg, hsl(230,45%,7%) 0%, hsl(228,50%,10%) 60%, hsl(225,40%,8%) 100%)"
+    }}>
 
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b border-border bg-background">
-        <div className="max-w-6xl mx-auto px-5 h-full flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded flex items-center justify-center bg-surface-2 border border-border">
-              <span className="sym-x text-sm font-black leading-none">×</span>
-            </div>
-            <span className="font-black text-sm tracking-tight">ХО<span className="cream">·</span>Battle</span>
+      {/* ─── HEADER ─── */}
+      <header className="relative z-50 flex items-center justify-between px-6 py-3 border-b border-white/5"
+        style={{ background: "rgba(10,12,30,0.85)", backdropFilter: "blur(12px)" }}>
+
+        {/* Logo */}
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("landing")}>
+          <div className="relative flex items-center gap-0.5">
+            <span className="font-black text-2xl leading-none" style={{ color: "#4dd9f0", textShadow: "0 0 12px #4dd9f088" }}>X</span>
+            <span className="font-black text-2xl leading-none" style={{ color: "#f04d6a", textShadow: "0 0 12px #f04d6a88" }}>O</span>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={onLoginClick} className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5">
-              Войти
-            </button>
-            <button onClick={onRegisterClick} className="btn-cream text-xs px-4 py-1.5">
-              Начать бесплатно
-            </button>
+          <div className="leading-none">
+            <div className="font-black text-sm tracking-widest text-white">NEXUS</div>
+            <div className="font-black text-sm tracking-widest" style={{ color: "#4dd9f0" }}>GRID</div>
           </div>
         </div>
+
+        {/* Nav */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navLinks.map((n, i) => (
+            <button
+              key={i}
+              onClick={() => handleNav(i, n.page)}
+              className="px-4 py-2 text-xs font-bold tracking-widest transition-all duration-200 rounded"
+              style={{
+                color: activeNav === i ? "#4dd9f0" : "rgba(180,200,240,0.6)",
+                borderBottom: activeNav === i ? "2px solid #4dd9f0" : "2px solid transparent",
+                textShadow: activeNav === i ? "0 0 8px #4dd9f066" : "none",
+              }}
+            >
+              {n.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Auth */}
+        <button
+          onClick={onRegisterClick}
+          className="flex items-center gap-2 px-5 py-2 rounded-full font-black text-xs tracking-widest transition-all duration-200 hover:scale-105"
+          style={{
+            background: "linear-gradient(90deg, #f5b731, #f08c1a)",
+            color: "#0a0c1e",
+            boxShadow: "0 0 18px #f5b73155",
+          }}
+        >
+          ВОЙТИ / РЕГИСТРАЦИЯ
+          <Icon name="User" size={14} />
+        </button>
       </header>
 
-      {/* Hero */}
-      <section className="pt-36 pb-28 px-5">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
-          <div className="animate-fade-in">
-            <div className="inline-flex items-center gap-2 border border-border rounded-full px-3 py-1 text-xs text-muted-foreground font-semibold mb-8">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              1 247 игроков онлайн
-            </div>
-            <h1 className="font-black text-5xl lg:text-[64px] leading-[0.93] tracking-tight mb-7">
-              Крестики&#8209;нолики<br />
-              <span className="cream">нового</span><br />
-              поколения
-            </h1>
-            <p className="text-muted-foreground text-[15px] leading-relaxed mb-10 max-w-sm font-medium">
-              Соревновательный режим, рейтинг Elo, уникальные скины и три уровня ИИ. Классика — переосмыслена.
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <button onClick={onRegisterClick} className="btn-cream px-7 py-3 text-sm">
-                Играть бесплатно
-              </button>
-              <button onClick={() => navigate("about")} className="btn-ghost px-7 py-3 text-sm">
-                Узнать больше
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-5 font-medium">
-              +50 монет при регистрации · Без карты
-            </p>
+      {/* ─── MAIN CONTENT ─── */}
+      <div className="flex flex-1 gap-4 px-4 py-4 max-w-[1400px] mx-auto w-full">
+
+        {/* Left sidebar — quick actions */}
+        <div className="hidden lg:flex flex-col gap-2 mt-8">
+          {[
+            { icon: "X",           color: "#f04d6a" },
+            { icon: "RefreshCw",   color: "#4dd9f0" },
+            { icon: "Shield",      color: "#4dd9f0" },
+            { icon: "Users",       color: "#4dd9f0" },
+          ].map((item, i) => (
+            <button
+              key={i}
+              className="w-10 h-10 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <Icon name={item.icon} size={16} style={{ color: item.color }} />
+            </button>
+          ))}
+        </div>
+
+        {/* ─── HERO CARD ─── */}
+        <div className="flex-1 relative rounded-2xl overflow-hidden min-h-[480px]"
+          style={{
+            border: "1px solid rgba(77,217,240,0.2)",
+            boxShadow: "0 0 40px rgba(77,217,240,0.08), inset 0 0 60px rgba(0,0,0,0.3)",
+            background: "rgba(10,14,35,0.8)",
+          }}>
+
+          {/* Neon corner accents */}
+          <div className="absolute top-0 left-0 w-16 h-16 pointer-events-none" style={{
+            background: "linear-gradient(135deg, rgba(77,217,240,0.3) 0%, transparent 60%)",
+          }} />
+          <div className="absolute bottom-0 right-0 w-16 h-16 pointer-events-none" style={{
+            background: "linear-gradient(315deg, rgba(240,77,106,0.3) 0%, transparent 60%)",
+          }} />
+
+          {/* Slider dots */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2">
+            {[0,1,2,3].map(i => (
+              <div key={i} className="rounded-full transition-all" style={{
+                width: i === 0 ? 20 : 6, height: 6,
+                background: i === 0 ? "#f5b731" : "rgba(255,255,255,0.2)",
+              }} />
+            ))}
           </div>
 
-          {/* Demo board */}
-          <div className="flex flex-col items-center gap-6 animate-fade-in delay-200">
-            <div className="relative">
-              <div className="grid grid-cols-3 gap-3 bg-card border border-border rounded-xl p-4 shadow-2xl">
-                {demoBoard.map((cell, i) => (
-                  <div
-                    key={i}
-                    className={`w-[84px] h-[84px] flex items-center justify-center rounded-lg border text-[38px] font-black transition-all duration-500
-                      ${WIN_CELLS.includes(i) && showWin
-                        ? "border-cream/30 bg-cream-subtle"
-                        : "border-border bg-secondary"
-                      }
-                    `}
-                  >
-                    {cell === "×" && <span style={{ color: skin.colorX }}>{skin.sym}</span>}
-                    {cell === "○" && <span style={{ color: skin.colorO }}>{skin.symO}</span>}
-                  </div>
-                ))}
+          <div className="flex flex-col md:flex-row items-center h-full p-6 md:p-10 gap-8">
+            {/* Game image */}
+            <div className="flex-1 flex items-center justify-center">
+              <div className="relative">
+                <img
+                  src="https://cdn.poehali.dev/projects/dfe95798-d875-4edf-a02d-60a24f7901f2/bucket/fb9e95d9-71a5-49ea-905e-e47fe9f2740f.png"
+                  alt="Nexus Grid game"
+                  className="w-72 md:w-96 object-contain animate-fade-in"
+                  style={{
+                    filter: "drop-shadow(0 0 30px rgba(77,217,240,0.4))",
+                    clipPath: "inset(0 57% 0 0)",
+                  }}
+                />
               </div>
-              {showWin && (
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-card border border-border text-xs font-bold px-4 py-1.5 rounded-full whitespace-nowrap cream animate-fade-in">
-                  Победа по диагонали
-                </div>
-              )}
             </div>
 
-            <div className="flex items-center gap-1.5 mt-3">
-              {skins.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSkinIdx(i)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${i === skinIdx ? "w-6 bg-cream" : "w-1.5 bg-border hover:bg-muted-foreground"}`}
-                />
+            {/* Hero text */}
+            <div className="flex-1 flex flex-col items-start justify-center">
+              <h1 className="font-black text-5xl md:text-6xl leading-none tracking-tight mb-2"
+                style={{ color: "#f5b731", textShadow: "0 0 30px #f5b73144" }}>
+                GRAVITY<br />ARENA
+              </h1>
+              <p className="text-xs font-bold tracking-widest mb-8"
+                style={{ color: "rgba(180,200,240,0.7)" }}>
+                БИТВА ГИГАНТОВ | РЕЙТИНГ
+              </p>
+
+              <button
+                onClick={onRegisterClick}
+                className="px-10 py-4 rounded font-black text-sm tracking-widest mb-8 transition-all hover:scale-105 hover:brightness-110 active:scale-95"
+                style={{
+                  background: "linear-gradient(90deg, #f5b731, #f08c1a)",
+                  color: "#0a0c1e",
+                  boxShadow: "0 0 30px #f5b73155, 0 4px 16px rgba(0,0,0,0.4)",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                ИГРАТЬ СЕЙЧАС
+              </button>
+
+              {/* Stats */}
+              <div className="flex items-center gap-8">
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest mb-1"
+                    style={{ color: "rgba(180,200,240,0.5)" }}>АКТИВНЫЕ МАТЧИ:</p>
+                  <p className="font-black text-2xl" style={{ color: "#fff" }}>
+                    {matchCount.toLocaleString("ru")}
+                  </p>
+                </div>
+                <div className="w-px h-10" style={{ background: "rgba(255,255,255,0.1)" }} />
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest mb-1"
+                    style={{ color: "rgba(180,200,240,0.5)" }}>ИГРОКИ ОНЛАЙН:</p>
+                  <p className="font-black text-2xl" style={{ color: "#fff" }}>
+                    {onlineCount.toLocaleString("ru")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ─── RIGHT SIDEBAR ─── */}
+        <div className="hidden lg:flex flex-col gap-4 w-72 shrink-0">
+
+          {/* Tournaments */}
+          <div className="rounded-xl p-4" style={{
+            background: "rgba(10,14,35,0.8)",
+            border: "1px solid rgba(255,255,255,0.07)",
+          }}>
+            <h3 className="font-black text-xs tracking-widest mb-3" style={{ color: "#fff" }}>
+              ТУРНИРЫ NEXUS
+            </h3>
+            <div className="rounded-lg p-3 mb-2 cursor-pointer hover:brightness-110 transition-all"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+              onClick={() => navigate("pro")}>
+              <div className="font-black text-sm text-white mb-0.5">NEXUS PRIME</div>
+              <div className="font-bold text-xs mb-2" style={{ color: "#f5b731" }}>$100K PRIZE POOL</div>
+              <div className="h-1 rounded-full mb-2" style={{ background: "rgba(255,255,255,0.1)" }}>
+                <div className="h-full rounded-full w-3/4" style={{ background: "linear-gradient(90deg,#f04d6a,#f5b731)" }} />
+              </div>
+              <div className="flex items-center gap-1 text-[10px] font-bold"
+                style={{ color: "#f04d6a" }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
+                24 ЧАСА ОСТАЛОСЬ
+              </div>
+            </div>
+            <button onClick={() => navigate("pro")} className="w-full text-xs font-bold py-2 rounded transition-all hover:brightness-110"
+              style={{ color: "#4dd9f0", background: "rgba(77,217,240,0.07)", border: "1px solid rgba(77,217,240,0.15)" }}>
+              Все турниры →
+            </button>
+          </div>
+
+          {/* Top Players */}
+          <div className="rounded-xl p-4 flex-1" style={{
+            background: "rgba(10,14,35,0.8)",
+            border: "1px solid rgba(255,255,255,0.07)",
+          }}>
+            <h3 className="font-black text-xs tracking-widest mb-3" style={{ color: "#fff" }}>
+              ТОП ИГРОКОВ
+            </h3>
+            <div className="flex flex-col gap-2">
+              {topPlayers.map(p => (
+                <div key={p.rank}
+                  className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer hover:brightness-110 transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                  onClick={() => navigate("leaderboard")}>
+                  <span className="text-xs font-black w-5" style={{
+                    color: p.rank === 1 ? "#f5b731" : p.rank === 2 ? "#9ab8d8" : "#cd7f32"
+                  }}>#{p.rank}</span>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0"
+                    style={{ background: "rgba(77,217,240,0.1)", border: "1px solid rgba(77,217,240,0.2)" }}>
+                    {p.badge}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-black text-xs text-white truncate">{p.name}</div>
+                    <div className="text-[10px]" style={{ color: "rgba(180,200,240,0.5)" }}>Ело {p.elo}</div>
+                  </div>
+                  <span className="text-xs font-black" style={{
+                    color: p.rank === 1 ? "#f5b731" : p.rank === 2 ? "#9ab8d8" : "#cd7f32"
+                  }}>#{p.rank}</span>
+                </div>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground font-medium -mt-2">Скин: {skin.name}</p>
+            <button onClick={() => navigate("leaderboard")} className="w-full text-xs font-bold py-2 mt-2 rounded transition-all hover:brightness-110"
+              style={{ color: "#4dd9f0", background: "rgba(77,217,240,0.07)", border: "1px solid rgba(77,217,240,0.15)" }}>
+              Полный рейтинг →
+            </button>
           </div>
         </div>
-      </section>
+      </div>
 
-      <div className="border-t border-border" />
+      {/* ─── BOTTOM BAR ─── */}
+      <div className="relative z-50 border-t flex items-center justify-between px-6 py-2"
+        style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,10,24,0.9)", backdropFilter: "blur(12px)" }}>
 
-      {/* Features */}
-      <section className="py-20 px-5">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-12">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3">Почему мы?</p>
-            <h2 className="font-black text-3xl tracking-tight">Настоящая соревновательная игра</h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {features.map((f, i) => (
-              <div key={i} className="card-premium p-5 animate-fade-in" style={{ animationDelay: `${i * 0.08}s` }}>
-                <div className="w-9 h-9 rounded bg-surface-2 border border-border flex items-center justify-center mb-4 cream">
-                  <Icon name={f.icon} size={16} />
-                </div>
-                <h3 className="font-bold text-sm mb-2">{f.title}</h3>
-                <p className="text-muted-foreground text-xs leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="border-t border-border" />
-
-      {/* Skins */}
-      <section className="py-20 px-5">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-10">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3">Магазин</p>
-            <h2 className="font-black text-3xl tracking-tight">Выдели себя</h2>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {shopItems.map((item, i) => (
-              <div key={i} className="card-premium px-4 py-3 flex items-center gap-3 animate-fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
-                <span className="font-semibold text-sm">{item.label}</span>
-                <span className="text-muted-foreground text-xs font-medium">{item.price}</span>
-                {item.tag === "free" && <span className="badge-muted">FREE</span>}
-                {item.tag === "hit"  && <span className="badge-cream">ХИТ</span>}
-                {item.tag === "new"  && <span className="badge-cream">NEW</span>}
-                {item.tag === "premium" && <span className="badge-muted">PRO</span>}
-                {item.tag === "anim" && <span className="badge-cream">ANIM</span>}
-              </div>
-            ))}
-          </div>
-          <button onClick={() => navigate("store")} className="mt-5 text-xs font-semibold cream hover:underline underline-offset-4">
-            Открыть магазин →
+        {/* Prev/Next */}
+        <div className="flex items-center gap-2">
+          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <Icon name="ChevronLeft" size={16} style={{ color: "rgba(180,200,240,0.6)" }} />
+          </button>
+          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
+            style={{ background: "rgba(77,217,240,0.12)", border: "1px solid rgba(77,217,240,0.25)" }}>
+            <Icon name="Gamepad2" size={16} style={{ color: "#4dd9f0" }} />
+          </button>
+          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <Icon name="ChevronRight" size={16} style={{ color: "rgba(180,200,240,0.6)" }} />
           </button>
         </div>
-      </section>
 
-      <div className="border-t border-border" />
-
-      {/* CTA */}
-      <section className="py-24 px-5">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
-          <div>
-            <h2 className="font-black text-4xl tracking-tight mb-3 leading-tight">
-              Начни прямо<br />сейчас
-            </h2>
-            <p className="text-muted-foreground text-sm font-medium">Бесплатно · 50 монет в подарок · Без карты</p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button onClick={onRegisterClick} className="btn-cream px-8 py-3.5 text-sm">
-              Создать аккаунт
+        {/* Bottom tabs */}
+        <div className="flex items-center gap-6">
+          {bottomTabs.map((tab, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveTab(i)}
+              className="flex flex-col items-center gap-0.5 px-3 py-1 transition-all"
+            >
+              <Icon name={tab.icon} size={18} style={{
+                color: activeTab === i ? "#4dd9f0" : "rgba(180,200,240,0.4)",
+                filter: activeTab === i ? "drop-shadow(0 0 6px #4dd9f0)" : "none",
+              }} />
+              <span className="text-[10px] font-bold tracking-widest" style={{
+                color: activeTab === i ? "#4dd9f0" : "rgba(180,200,240,0.4)",
+              }}>{tab.label}</span>
             </button>
-            <button onClick={onLoginClick} className="btn-ghost px-8 py-3.5 text-sm">
-              Войти
-            </button>
-          </div>
+          ))}
         </div>
-      </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8 px-5">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="font-black text-sm tracking-tight mb-1">ХО<span className="cream">·</span>Battle</div>
-            <p className="text-xs text-muted-foreground">© 2026 · Крестики-нолики нового поколения</p>
-          </div>
-          <div className="flex items-center gap-5">
-            {(["about", "pro", "leaderboard"] as Page[]).map(p => (
-              <button key={p} onClick={() => navigate(p)} className="text-xs text-muted-foreground hover:text-foreground transition-colors font-semibold">
-                {p === "about" ? "О игре" : p === "pro" ? "PRO" : "Рейтинг"}
-              </button>
-            ))}
-          </div>
-        </div>
-      </footer>
+        {/* Play button */}
+        <button
+          onClick={() => navigate("game")}
+          className="px-6 py-2 rounded font-black text-xs tracking-widest transition-all hover:scale-105"
+          style={{
+            background: "linear-gradient(90deg,#4dd9f0,#2a7fb8)",
+            color: "#0a0c1e",
+            boxShadow: "0 0 16px rgba(77,217,240,0.3)",
+          }}
+        >
+          ИГРАТЬ
+        </button>
+      </div>
+
     </div>
   );
 }
