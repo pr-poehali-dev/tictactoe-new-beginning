@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import func2url from "../../backend/func2url.json";
+import FUNCTIONS from "@/lib/api";
 
-const AUTH_URL = func2url.auth;
+const AUTH_URL = FUNCTIONS.auth;
 const TOKEN_KEY = "xo_token";
 
 export interface User {

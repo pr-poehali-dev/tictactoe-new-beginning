@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
-import func2url from "../../backend/func2url.json";
+import FUNCTIONS from "@/lib/api";
 
-const PAYMENT_URL = func2url.payment;
+const PAYMENT_URL = FUNCTIONS.payment;
 
 interface StorePageProps {
   coins: number;

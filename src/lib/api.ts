@@ -1,0 +1,6 @@
+const FUNCTIONS: Record<string, string> = {
+  auth:    "https://functions.poehali.dev/84cd2016-9d5c-42ed-aafb-2ea08a03767b",
+  payment: "https://functions.poehali.dev/fa664307-da86-4ece-b7db-3f470d6f185c",
+};
+
+export default FUNCTIONS;
