@@ -64,8 +64,8 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
             <span className="font-black text-2xl leading-none" style={{ color: "#f04d6a", textShadow: "0 0 12px #f04d6a88" }}>O</span>
           </div>
           <div className="leading-none">
-            <div className="font-black text-sm tracking-widest text-white">NEXUS</div>
-            <div className="font-black text-sm tracking-widest" style={{ color: "#4dd9f0" }}>GRID</div>
+            <div className="font-black text-sm tracking-widest text-white">КРЕСТИКИ-</div>
+            <div className="font-black text-sm tracking-widest" style={{ color: "#4dd9f0" }}>НОЛИКИ</div>
           </div>
         </div>
 
