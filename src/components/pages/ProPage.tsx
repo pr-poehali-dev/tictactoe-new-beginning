@@ -4,8 +4,8 @@ const features = [
   { icon: "BanIcon",    label: "Без рекламы",       desc: "Никаких баннеров и прерываний во время игры" },
   { icon: "BarChart3",  label: "Анализ матчей",      desc: "Показывает решающий ход и где была допущена ошибка" },
   { icon: "Map",        label: "Тепловая карта",     desc: "Статистика ходов по клеткам за все матчи" },
-  { icon: "BadgeCheck", label: "PRO-значок",         desc: "Эксклюзивная метка рядом с именем в рейтинге" },
-  { icon: "Zap",        label: "×2 монеты",          desc: "Удвоенный заработок за победы в PvP-режиме" },
+  { icon: "BadgeCheck", label: "Значок PRO",          desc: "Эксклюзивная метка рядом с именем в рейтинге" },
+  { icon: "Zap",        label: "×2 монеты",          desc: "Удвоенный заработок за победы онлайн" },
   { icon: "Unlock",     label: "Ранний доступ",      desc: "Новые скины и режимы — раньше остальных" },
 ];
 
@@ -17,12 +17,12 @@ const plans = [
 
 const comparison = [
   ["Игры с ботом",       true,  true ],
-  ["PvP-матчи",          true,  true ],
+  ["Онлайн-матчи",       true,  true ],
   ["Базовые скины",      true,  true ],
   ["Реклама",            "Да",  "Нет"],
   ["Анализ матчей",      false, true ],
   ["Тепловая карта",     false, true ],
-  ["PRO-значок",         false, true ],
+  ["Значок PRO",         false, true ],
   ["×2 монеты за победу",false, true ],
 ];
 
@@ -41,7 +41,7 @@ export default function ProPage() {
         <div className="py-16 border-b border-border mb-14 animate-fade-in">
           <div className="inline-flex items-center gap-2 border border-border rounded-full px-3 py-1 text-xs font-bold text-muted-foreground mb-8 uppercase tracking-widest">
             <Icon name="Star" size={11} className="cream" />
-            PRO-Игрок
+            Подписка PRO
           </div>
           <h1 className="font-black text-5xl lg:text-6xl tracking-tight leading-[0.93] mb-5">
             Раскрой<br /><span className="cream">полный потенциал</span>
@@ -111,7 +111,7 @@ export default function ProPage() {
             <div className="grid grid-cols-3 px-5 py-3 border-b border-border bg-surface-2">
               <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Функция</div>
               <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground text-center">Бесплатно</div>
-              <div className="text-xs font-bold uppercase tracking-widest cream text-center">PRO</div>
+              <div className="text-xs font-bold uppercase tracking-widest cream text-center">Про</div>
             </div>
             <div className="divide-y divide-border">
               {comparison.map(([feat, free, pro], i) => (
