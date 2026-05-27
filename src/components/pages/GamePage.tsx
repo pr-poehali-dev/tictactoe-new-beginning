@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { type Page } from "@/pages/Index";
 import Icon from "@/components/ui/icon";
 import { type User } from "@/hooks/useAuth";
+import FUNCTIONS from "@/lib/api";
 
 interface GamePageProps {
   navigate: (page: Page) => void;
@@ -64,28 +65,99 @@ function getBotMove(board: Cell[], difficulty: string): number {
 }
 
 const modeOptions = [
-  { id: "ai-easy",   label: "Новичок",      desc: "Бот ошибается — идеально для начала",    icon: "Bot",   tag: "ЛЕГКО" },
-  { id: "ai-medium", label: "Любитель",     desc: "Бот защищается, иногда даёт слабину",    icon: "Bot",   tag: "СРЕДНЕ" },
-  { id: "ai-expert", label: "Эксперт",      desc: "Минимакс — максимум что вы добьётесь: ничья", icon: "Cpu",   tag: "ВЫЗОВ" },
-  { id: "pvp",       label: "Быстрая игра", desc: "Онлайн по рейтингу, 15 сек на ход",      icon: "Swords", tag: "+МОНЕТЫ" },
-  { id: "friend",    label: "С другом",     desc: "По ссылке, без рейтинга",                icon: "Users",  tag: "ДРУЗЬЯ" },
+  { id: "ai-easy",   label: "Новичок",      desc: "Бот ошибается — идеально для начала",         icon: "Bot",    tag: "ЛЕГКО"    },
+  { id: "ai-medium", label: "Любитель",     desc: "Бот защищается, иногда даёт слабину",         icon: "Bot",    tag: "СРЕДНЕ"   },
+  { id: "ai-expert", label: "Эксперт",      desc: "Минимакс — максимум что добьёшься: ничья",    icon: "Cpu",    tag: "ВЫЗОВ"    },
+  { id: "pvp",       label: "Быстрая игра", desc: "Онлайн по рейтингу, 15 сек на ход",           icon: "Swords", tag: "+МОНЕТЫ"  },
+  { id: "friend",    label: "С другом",     desc: "На одном устройстве, без рейтинга",           icon: "Users",  tag: "ДРУЗЬЯ"   },
 ];
 
+const OPPONENT_LABEL: Record<string, string> = {
+  "ai-easy":   "Bot (Новичок)",
+  "ai-medium": "Bot (Любитель)",
+  "ai-expert": "Bot (Эксперт)",
+  "pvp":       "Opponent",
+  "friend":    "Friend",
+};
+
+interface FinishResult {
+  elo_delta: number;
+  new_elo: number;
+  coins_earned: number;
+  new_coins: number;
+  xp_earned: number;
+  new_level: number;
+  rank: string;
+}
+
 export default function GamePage({ navigate, user, updateUser }: GamePageProps) {
-  const coins = user.coins;
-  const [mode, setMode] = useState<Mode>(null);
-  const [board, setBoard] = useState<Cell[]>(Array(9).fill(null));
-  const [turn, setTurn] = useState<"X" | "O">("X");
-  const [status, setStatus] = useState<"playing" | "won" | "lost" | "draw">("playing");
-  const [winLine, setWinLine] = useState<number[]>([]);
+  const [mode, setMode]           = useState<Mode>(null);
+  const [board, setBoard]         = useState<Cell[]>(Array(9).fill(null));
+  const [turn, setTurn]           = useState<"X" | "O">("X");
+  const [status, setStatus]       = useState<"playing" | "won" | "lost" | "draw">("playing");
+  const [winLine, setWinLine]     = useState<number[]>([]);
   const [botThinking, setBotThinking] = useState(false);
-  const [timer, setTimer] = useState(15);
+  const [timer, setTimer]         = useState(15);
+  const [finishResult, setFinishResult] = useState<FinishResult | null>(null);
+  const [savingResult, setSavingResult] = useState(false);
+  const gameStartRef              = useRef<number>(Date.now());
 
   const startGame = (m: Mode) => {
-    setMode(m); setBoard(Array(9).fill(null));
-    setTurn("X"); setStatus("playing"); setWinLine([]); setTimer(15);
+    setMode(m);
+    setBoard(Array(9).fill(null));
+    setTurn("X");
+    setStatus("playing");
+    setWinLine([]);
+    setTimer(15);
+    setFinishResult(null);
+    gameStartRef.current = Date.now();
   };
-  const resetGame = () => { setMode(null); setBoard(Array(9).fill(null)); setStatus("playing"); setWinLine([]); };
+
+  const resetGame = () => {
+    setMode(null);
+    setBoard(Array(9).fill(null));
+    setStatus("playing");
+    setWinLine([]);
+    setFinishResult(null);
+  };
+
+  // Сохраняем результат в БД
+  const saveResult = useCallback(async (result: "won" | "lost" | "draw", currentMode: Mode) => {
+    if (!currentMode) return;
+    const token = localStorage.getItem("xo_token");
+    if (!token) return;
+
+    setSavingResult(true);
+    const duration = Math.round((Date.now() - gameStartRef.current) / 1000);
+    try {
+      const res = await fetch(FUNCTIONS.game, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          action: "finish",
+          mode: currentMode,
+          result,
+          opponent: OPPONENT_LABEL[currentMode] || "Opponent",
+          duration_sec: duration,
+        }),
+      });
+      if (res.ok) {
+        const data: FinishResult = await res.json();
+        setFinishResult(data);
+        updateUser({
+          coins: data.new_coins,
+          elo: data.new_elo,
+          wins:   result === "won"  ? user.wins + 1  : user.wins,
+          losses: result === "lost" ? user.losses + 1: user.losses,
+          draws:  result === "draw" ? user.draws + 1 : user.draws,
+          level: data.new_level,
+          rank: data.rank,
+        });
+      }
+    } finally {
+      setSavingResult(false);
+    }
+  }, [user, updateUser]);
 
   const makeMove = useCallback((index: number) => {
     if (board[index] || status !== "playing" || botThinking) return;
@@ -94,14 +166,21 @@ export default function GamePage({ navigate, user, updateUser }: GamePageProps) 
     setBoard(nb);
     if (winner) {
       setWinLine(line);
-      if (winner === "X") { setStatus("won"); if (mode === "pvp") updateUser({ coins: coins + 15 }); }
-      else setStatus("lost");
+      const result = winner === "X" ? "won" : "lost";
+      setStatus(result);
       return;
     }
     if (nb.every(c => c !== null)) { setStatus("draw"); return; }
     setTurn(turn === "X" ? "O" : "X");
-  }, [board, turn, status, botThinking, mode, coins, updateUser]);
+  }, [board, turn, status, botThinking]);
 
+  // Сохраняем при изменении статуса
+  useEffect(() => {
+    if (status === "playing" || !mode) return;
+    saveResult(status as "won" | "lost" | "draw", mode);
+  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Ход бота
   useEffect(() => {
     if (!mode || mode === "pvp" || mode === "friend" || turn !== "O" || status !== "playing") return;
     setBotThinking(true);
@@ -117,6 +196,7 @@ export default function GamePage({ navigate, user, updateUser }: GamePageProps) 
     return () => clearTimeout(t);
   }, [turn, mode, board, status]);
 
+  // Таймер PvP
   useEffect(() => {
     if (mode !== "pvp" || status !== "playing") return;
     if (timer <= 0) { makeMove(board.findIndex(c => c === null)); return; }
@@ -129,6 +209,7 @@ export default function GamePage({ navigate, user, updateUser }: GamePageProps) 
   const isAI = mode !== "pvp" && mode !== "friend";
   const modeName = modeOptions.find(m => m.id === mode)?.label;
 
+  // --- Экран выбора режима ---
   if (!mode) {
     return (
       <div className="min-h-screen pt-20 pb-16 px-5">
@@ -160,7 +241,7 @@ export default function GamePage({ navigate, user, updateUser }: GamePageProps) 
           </div>
           <div className="mt-4 p-3 rounded-lg bg-surface-2 border border-border">
             <p className="text-xs text-muted-foreground font-medium text-center">
-              Игры с ботом не приносят монеты · Онлайн-матчи — источник заработка
+              Победы над ботом тоже приносят монеты · Онлайн-матчи дают Elo
             </p>
           </div>
         </div>
@@ -168,6 +249,7 @@ export default function GamePage({ navigate, user, updateUser }: GamePageProps) 
     );
   }
 
+  // --- Экран игры ---
   return (
     <div className="min-h-screen pt-20 pb-16 px-5">
       <div className="max-w-md mx-auto">
@@ -181,122 +263,120 @@ export default function GamePage({ navigate, user, updateUser }: GamePageProps) 
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{modeName}</span>
           {mode === "pvp" ? (
             <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-base border-2 transition-colors
-              ${timer <= 5 ? "border-red-500 text-red-500" : "border-border cream"}
-            `}>
+              ${timer <= 5 ? "border-red-500 text-red-500" : "border-border cream"}`}>
               {timer}
             </div>
           ) : <div className="w-9" />}
         </div>
 
         {/* Players */}
-        <div className="flex items-center justify-between mb-6 animate-fade-in delay-100">
+        <div className="flex items-center justify-between mb-6 animate-fade-in">
           <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all border
-            ${turn === "X" && status === "playing" ? "border-cream/30 bg-cream-subtle" : "border-transparent"}
-          `}>
-            <div className="w-8 h-8 rounded-md bg-surface-2 border border-border flex items-center justify-center font-black sym-x text-sm">A</div>
+            ${turn === "X" && status === "playing"
+              ? "border-cream/30 bg-cream-subtle"
+              : "border-transparent bg-transparent"}`}>
+            <span className="text-2xl">{user.avatar_emoji}</span>
             <div>
-              <div className="font-bold text-xs">Alexxx_Pro</div>
-              <div className="text-muted-foreground text-[10px] font-medium">Elo 1482</div>
+              <div className="font-bold text-xs">{user.login}</div>
+              <div className="sym-x font-black text-base leading-none">X</div>
             </div>
-            <span className="sym-x font-black text-lg ml-1">×</span>
           </div>
-
-          <span className="text-muted-foreground text-xs font-bold">VS</span>
-
+          <div className="font-black text-muted-foreground text-sm">VS</div>
           <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all border
-            ${turn === "O" && status === "playing" ? "border-blue/30 bg-blue-subtle" : "border-transparent"}
-          `}>
-            <span className="sym-o font-black text-lg mr-1">○</span>
+            ${turn === "O" && status === "playing"
+              ? "border-muted-foreground/20 bg-surface-2"
+              : "border-transparent bg-transparent"}`}>
             <div className="text-right">
-              <div className="font-bold text-xs">{isAI ? "Бот" : "Соперник"}</div>
-              <div className="text-muted-foreground text-[10px] font-medium">{isAI ? modeName : "Elo ~1470"}</div>
+              <div className="font-bold text-xs">{isAI ? "Bot" : "Player 2"}</div>
+              <div className="sym-o font-black text-base leading-none text-right">O</div>
             </div>
-            <div className="w-8 h-8 rounded-md bg-surface-2 border border-border flex items-center justify-center">
-              {isAI ? <Icon name="Bot" size={14} className="text-muted-foreground" /> : <Icon name="User" size={14} className="text-muted-foreground" />}
-            </div>
+            <div className="text-2xl">{isAI ? "🤖" : "🎮"}</div>
           </div>
         </div>
 
         {/* Board */}
-        <div className="relative mb-6 animate-scale-in delay-150">
-          <div className="grid grid-cols-3 gap-3 bg-card border border-border p-4 rounded-xl">
-            {board.map((cell, i) => {
-              const isWin = winLine.includes(i);
-              return (
-                <button
-                  key={i}
-                  onClick={() => (mode === "friend" || turn === "X") && makeMove(i)}
-                  disabled={!!cell || status !== "playing" || (isAI && turn === "O")}
-                  className={`h-24 sm:h-28 flex items-center justify-center rounded-lg border font-black text-5xl transition-all duration-200 relative overflow-hidden
-                    ${isWin
-                      ? "bg-amber-subtle border-amber/40 scale-[1.05] cell-win"
-                      : cell === "X"
-                        ? "bg-surface-2 border-border cursor-default cell-flash-x"
-                        : cell === "O"
-                          ? "bg-surface-2 border-border cursor-default cell-flash-o"
-                          : "bg-secondary border-border hover:bg-surface-3 hover:border-muted-foreground/20 hover:scale-[1.02] active:scale-95"
-                    }
-                  `}
-                  style={isWin ? { borderColor: "hsl(32 95% 64% / 0.4)", background: "hsl(32 40% 16%)" } : undefined}
-                >
-                  {cell === "X" && (
-                    <span className="sym-x sym-x-animate select-none">×</span>
-                  )}
-                  {cell === "O" && (
-                    <span className="sym-o sym-o-animate select-none">○</span>
-                  )}
-                </button>
-              );
-            })}
+        <div className="grid grid-cols-3 gap-2 mb-6 animate-fade-in">
+          {board.map((cell, i) => {
+            const isWin = winLine.includes(i);
+            return (
+              <button
+                key={i}
+                onClick={() => makeMove(i)}
+                disabled={!!cell || status !== "playing" || (isAI && turn === "O")}
+                className={`aspect-square rounded-xl border-2 flex items-center justify-center text-5xl font-black transition-all duration-150
+                  ${cell ? "cursor-default" : "cursor-pointer hover:bg-surface-2"}
+                  ${isWin ? "border-cream/50 bg-cream-subtle" : "border-border bg-card"}
+                  ${!cell && status === "playing" ? "hover:border-muted-foreground/30" : ""}
+                `}
+              >
+                {cell === "X" && <span className={`sym-x ${isWin ? "cream" : ""}`}>×</span>}
+                {cell === "O" && <span className={`sym-o ${isWin ? "" : "opacity-80"}`}>○</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Bot thinking */}
+        {botThinking && (
+          <div className="text-center text-xs text-muted-foreground font-medium mb-4 animate-pulse">
+            Бот думает...
           </div>
-        </div>
+        )}
 
-        {/* Status */}
-        <div className="animate-fade-in delay-200">
-          {status === "playing" && (
-            <div className="text-center text-xs text-muted-foreground font-semibold">
-              {botThinking ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-pulse" />
-                  Бот думает...
-                </span>
-              ) : (
-                <span>Ход: <span className={turn === "X" ? "cream font-bold" : "text-blue-sym font-bold"}>{turn === "X" ? "Вы (×)" : isAI ? "Бот (○)" : "Соперник (○)"}</span></span>
-              )}
+        {/* Result */}
+        {status !== "playing" && (
+          <div className="card-premium p-6 text-center animate-scale-in">
+            <div className="text-4xl mb-3">
+              {status === "won" ? "🏆" : status === "lost" ? "💀" : "🤝"}
             </div>
-          )}
+            <div className="font-black text-2xl tracking-tight mb-1">
+              {status === "won" ? "Победа!" : status === "lost" ? "Поражение" : "Ничья"}
+            </div>
 
-          {status !== "playing" && (
-            <div className="card-premium p-6 text-center">
-              <div className="text-4xl mb-3">
-                {status === "won" ? "🏆" : status === "lost" ? "😤" : "🤝"}
+            {/* Rewards */}
+            {finishResult && !savingResult && (
+              <div className="flex items-center justify-center gap-4 mt-3 mb-4">
+                {finishResult.coins_earned > 0 && (
+                  <div className="flex items-center gap-1.5 text-sm font-bold cream">
+                    <span>⬡</span>
+                    <span>+{finishResult.coins_earned} монет</span>
+                  </div>
+                )}
+                {finishResult.elo_delta !== 0 && (
+                  <div className={`flex items-center gap-1 text-sm font-bold ${finishResult.elo_delta > 0 ? "text-green-400" : "text-red-400"}`}>
+                    <Icon name="TrendingUp" size={14} />
+                    <span>{finishResult.elo_delta > 0 ? "+" : ""}{finishResult.elo_delta} Elo</span>
+                  </div>
+                )}
+                {finishResult.xp_earned > 0 && (
+                  <div className="flex items-center gap-1 text-sm font-bold text-blue-400">
+                    <Icon name="Zap" size={14} />
+                    <span>+{finishResult.xp_earned} XP</span>
+                  </div>
+                )}
               </div>
-              <h2 className="font-black text-2xl tracking-tight mb-2">
-                {status === "won" ? "Победа" : status === "lost" ? "Поражение" : "Ничья"}
-              </h2>
-              {mode === "pvp" && status === "won" && (
-                <p className="cream text-xs font-bold mb-4">+15 монет · +18 рейтинга</p>
-              )}
-              {mode === "pvp" && status === "lost" && (
-                <div className="mb-4">
-                  <p className="text-muted-foreground text-xs font-medium mb-3">−14 рейтинга</p>
-                  <button className="flex items-center gap-2 mx-auto text-xs border border-border text-muted-foreground hover:text-foreground px-4 py-2 rounded-lg transition-colors font-semibold">
-                    <Icon name="Play" size={12} />
-                    Восстановить рейтинг (реклама)
-                  </button>
-                </div>
-              )}
-              <div className="flex gap-2 justify-center mt-5">
-                <button onClick={() => startGame(mode)} className="btn-cream px-6 py-2.5 text-sm">
-                  Ещё раз
-                </button>
-                <button onClick={resetGame} className="btn-ghost px-6 py-2.5 text-sm">
-                  Меню
-                </button>
-              </div>
+            )}
+            {savingResult && (
+              <div className="text-xs text-muted-foreground animate-pulse mt-2 mb-4">Сохраняем результат...</div>
+            )}
+
+            <div className="flex gap-2 mt-2">
+              <button onClick={() => startGame(mode)} className="flex-1 btn-cream py-2.5 text-sm">
+                Реванш
+              </button>
+              <button onClick={resetGame} className="flex-1 btn-ghost py-2.5 text-sm">
+                В меню
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Status line */}
+        {status === "playing" && !botThinking && (
+          <div className="text-center text-xs text-muted-foreground font-medium">
+            Ход: <span className={turn === "X" ? "cream font-bold" : "font-bold"}>{turn === "X" ? user.login : (isAI ? "Bot" : "Player 2")}</span>
+          </div>
+        )}
       </div>
     </div>
   );

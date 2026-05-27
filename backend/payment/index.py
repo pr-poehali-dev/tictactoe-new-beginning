@@ -1,18 +1,16 @@
 """
 Платежи через ЮKassa.
-POST / {action: "create", package_id, token} — создать платёж, вернуть ссылку на оплату
-POST / {action: "status", payment_id}        — проверить статус платежа
-POST / {action: "webhook"}                   — вебхук от ЮKassa (зачислить монеты)
+POST / {action: "create", package_id}  — создать платёж (монеты или PRO), вернуть ссылку
+POST / {action: "status", payment_id} — проверить статус платежа
+POST / {action: "webhook"}            — вебхук от ЮKassa (зачислить монеты / активировать PRO)
 """
 import json
 import os
 import uuid
-import hmac
-import hashlib
 import base64
 import urllib.request
-import urllib.parse
 import psycopg2
+from datetime import datetime, timedelta
 
 CORS = {
     "Access-Control-Allow-Origin": "*",
@@ -20,11 +18,15 @@ CORS = {
     "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Authorization",
 }
 
-# Пакеты монет: id → (монеты, цена в рублях, описание)
+# Пакеты монет
 PACKAGES = {
-    "coins_100":  {"coins": 100,  "rub": 99,   "label": "100 монет",  "bonus": ""},
-    "coins_500":  {"coins": 500,  "rub": 399,  "label": "500 монет",  "bonus": "+50 бонус"},
-    "coins_1500": {"coins": 1500, "rub": 999,  "label": "1500 монет", "bonus": "+300 бонус"},
+    "coins_100":  {"type": "coins", "coins": 100,  "rub": 99,   "label": "100 монет"},
+    "coins_500":  {"type": "coins", "coins": 550,  "rub": 399,  "label": "500+50 монет"},
+    "coins_1500": {"type": "coins", "coins": 1800, "rub": 999,  "label": "1500+300 монет"},
+    # PRO-подписки
+    "pro_1m":  {"type": "pro", "days": 30,  "rub": 199,  "label": "PRO на 1 месяц"},
+    "pro_3m":  {"type": "pro", "days": 90,  "rub": 449,  "label": "PRO на 3 месяца"},
+    "pro_12m": {"type": "pro", "days": 365, "rub": 1490, "label": "PRO на 12 месяцев"},
 }
 
 
@@ -88,15 +90,8 @@ def handler(event: dict, context) -> dict:
         if not pkg:
             return _err(400, "Неверный пакет")
 
-        # Реальные монеты с учётом бонуса
-        total_coins = pkg["coins"]
-        if package_id == "coins_500":
-            total_coins = 550
-        elif package_id == "coins_1500":
-            total_coins = 1800
-
-        idempotency_key = str(uuid.uuid4())
         return_url = body.get("return_url", "https://poehali.dev")
+        total_coins = pkg.get("coins", 0)
 
         # Создаём запись в БД
         conn = get_conn()
@@ -121,13 +116,14 @@ def handler(event: dict, context) -> dict:
                 "payment_row_id": str(payment_row_id),
                 "user_id": str(user_id),
                 "package_id": package_id,
+                "pkg_type": pkg["type"],
                 "coins": str(total_coins),
+                "pro_days": str(pkg.get("days", 0)),
             },
         }
 
         yk_resp = yukassa_request("POST", "/payments", yk_body)
 
-        # Сохраняем yukassa_payment_id
         conn = get_conn()
         cur = conn.cursor()
         cur.execute(
@@ -143,7 +139,7 @@ def handler(event: dict, context) -> dict:
             "payment_id": payment_row_id,
             "yukassa_id": yk_resp["id"],
             "confirmation_url": confirmation_url,
-            "package": pkg,
+            "pkg_type": pkg["type"],
             "coins": total_coins,
         })
 
@@ -180,23 +176,37 @@ def handler(event: dict, context) -> dict:
         if status == "pending" and yk_id:
             yk = yukassa_request("GET", f"/payments/{yk_id}")
             if yk.get("status") == "succeeded":
-                conn = get_conn()
-                cur = conn.cursor()
-                cur.execute(
+                meta = yk.get("metadata", {})
+                pkg_type = meta.get("pkg_type", "coins")
+                pro_days = int(meta.get("pro_days", 0))
+                conn2 = get_conn()
+                cur2 = conn2.cursor()
+                cur2.execute(
                     "UPDATE payments SET status = 'paid', paid_at = NOW() WHERE id = %s AND status = 'pending'",
                     (payment_id,)
                 )
-                cur.execute(
-                    "UPDATE users SET coins = coins + %s WHERE id = %s",
-                    (coins, user[0])
-                )
-                cur.execute(
-                    "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, %s, %s, %s)",
-                    (user[0], "purchase", coins, f"Покупка монет (платёж #{payment_id})")
-                )
-                conn.commit()
-                cur.close()
-                conn.close()
+                if cur2.rowcount > 0:
+                    if pkg_type == "pro" and pro_days > 0:
+                        cur2.execute(
+                            "UPDATE users SET is_pro = TRUE WHERE id = %s",
+                            (user[0],)
+                        )
+                        cur2.execute(
+                            "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, %s, %s, %s)",
+                            (user[0], "pro_purchase", 0, f"PRO-подписка на {pro_days} дней")
+                        )
+                    else:
+                        cur2.execute(
+                            "UPDATE users SET coins = coins + %s WHERE id = %s",
+                            (coins, user[0])
+                        )
+                        cur2.execute(
+                            "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, %s, %s, %s)",
+                            (user[0], "purchase", coins, f"Покупка монет (платёж #{payment_id})")
+                        )
+                conn2.commit()
+                cur2.close()
+                conn2.close()
                 status = "paid"
 
         # Получаем свежий баланс
@@ -221,9 +231,11 @@ def handler(event: dict, context) -> dict:
         meta = yk_payment.get("metadata", {})
         payment_row_id = meta.get("payment_row_id")
         user_id = meta.get("user_id")
-        coins = meta.get("coins")
+        pkg_type = meta.get("pkg_type", "coins")
+        coins = int(meta.get("coins", 0))
+        pro_days = int(meta.get("pro_days", 0))
 
-        if not all([yk_id, payment_row_id, user_id, coins]):
+        if not all([yk_id, payment_row_id, user_id]):
             return _ok({"ok": True})
 
         conn = get_conn()
@@ -233,14 +245,25 @@ def handler(event: dict, context) -> dict:
             (payment_row_id, yk_id)
         )
         if cur.rowcount > 0:
-            cur.execute(
-                "UPDATE users SET coins = coins + %s WHERE id = %s",
-                (int(coins), int(user_id))
-            )
-            cur.execute(
-                "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, %s, %s, %s)",
-                (int(user_id), "purchase", int(coins), f"Покупка монет (платёж #{payment_row_id})")
-            )
+            if pkg_type == "pro" and pro_days > 0:
+                # Активируем PRO
+                cur.execute(
+                    "UPDATE users SET is_pro = TRUE WHERE id = %s",
+                    (int(user_id),)
+                )
+                cur.execute(
+                    "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, %s, %s, %s)",
+                    (int(user_id), "pro_purchase", 0, f"PRO-подписка на {pro_days} дней (платёж #{payment_row_id})")
+                )
+            else:
+                cur.execute(
+                    "UPDATE users SET coins = coins + %s WHERE id = %s",
+                    (coins, int(user_id))
+                )
+                cur.execute(
+                    "INSERT INTO transactions (user_id, type, amount, description) VALUES (%s, %s, %s, %s)",
+                    (int(user_id), "purchase", coins, f"Покупка монет (платёж #{payment_row_id})")
+                )
         conn.commit()
         cur.close()
         conn.close()

@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "finish without token",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "finish", "mode": "ai-easy", "result": "won"},
+      "expectedStatus": 401
+    },
+    {
+      "name": "leaderboard public",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "leaderboard", "period": "all", "limit": 10},
+      "expectedStatus": 200
+    },
+    {
+      "name": "history without token",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "history"},
+      "expectedStatus": 401
+    }
+  ]
+}
