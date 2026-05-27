@@ -169,7 +169,7 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
             <div className="flex-1 flex flex-col items-start justify-center">
               <h1 className="font-black text-5xl md:text-6xl leading-none tracking-tight mb-2"
                 style={{ color: "#f5b731", textShadow: "0 0 30px #f5b73144" }}>
-                GRAVITY<br />ARENA
+                БИТВА<br />АРЕНА
               </h1>
               <p className="text-xs font-bold tracking-widest mb-8"
                 style={{ color: "rgba(180,200,240,0.7)" }}>
