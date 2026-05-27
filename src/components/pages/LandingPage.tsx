@@ -155,7 +155,7 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
               <div className="relative">
                 <img
                   src="https://cdn.poehali.dev/projects/dfe95798-d875-4edf-a02d-60a24f7901f2/bucket/fb9e95d9-71a5-49ea-905e-e47fe9f2740f.png"
-                  alt="Nexus Grid game"
+                  alt="Крестики-нолики"
                   className="w-72 md:w-96 object-contain animate-fade-in"
                   style={{
                     filter: "drop-shadow(0 0 30px rgba(77,217,240,0.4))",
@@ -220,13 +220,13 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
             border: "1px solid rgba(255,255,255,0.07)",
           }}>
             <h3 className="font-black text-xs tracking-widest mb-3" style={{ color: "#fff" }}>
-              ТУРНИРЫ NEXUS
+              МОИ ТУРНИРЫ
             </h3>
             <div className="rounded-lg p-3 mb-2 cursor-pointer hover:brightness-110 transition-all"
               style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
               onClick={() => navigate("pro")}>
-              <div className="font-black text-sm text-white mb-0.5">NEXUS PRIME</div>
-              <div className="font-bold text-xs mb-2" style={{ color: "#f5b731" }}>$100K PRIZE POOL</div>
+              <div className="font-black text-sm text-white mb-0.5">ГЛАВНЫЙ ТУРНИР</div>
+              <div className="font-bold text-xs mb-2" style={{ color: "#f5b731" }}>ПРИЗОВОЙ ФОНД $100К</div>
               <div className="h-1 rounded-full mb-2" style={{ background: "rgba(255,255,255,0.1)" }}>
                 <div className="h-full rounded-full w-3/4" style={{ background: "linear-gradient(90deg,#f04d6a,#f5b731)" }} />
               </div>
