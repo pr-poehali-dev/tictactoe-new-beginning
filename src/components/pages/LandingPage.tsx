@@ -113,21 +113,6 @@ function AnimatedBoard() {
         {/* horizontal */}
         <line x1={10} y1={SIZE/3} x2={SIZE-10} y2={SIZE/3} stroke="rgba(77,217,240,0.2)" strokeWidth="1.5" strokeLinecap="round" />
         <line x1={10} y1={SIZE*2/3} x2={SIZE-10} y2={SIZE*2/3} stroke="rgba(77,217,240,0.2)" strokeWidth="1.5" strokeLinecap="round" />
-        {/* Win line */}
-        {showLine && (
-          <line
-            x1={x1} y1={y1} x2={x2} y2={y2}
-            stroke={winnerColor}
-            strokeWidth="4"
-            strokeLinecap="round"
-            style={{
-              filter: `drop-shadow(0 0 8px ${winnerColor})`,
-              strokeDasharray: 400,
-              strokeDashoffset: 0,
-              animation: "xo-line 0.45s cubic-bezier(0.4,0,0.2,1) forwards",
-            }}
-          />
-        )}
       </svg>
       {/* Cells */}
       <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
@@ -153,6 +138,23 @@ function AnimatedBoard() {
           </div>
         ))}
       </div>
+      {/* Win line — поверх символов */}
+      {showLine && (
+        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 10 }} width={SIZE} height={SIZE}>
+          <line
+            x1={x1} y1={y1} x2={x2} y2={y2}
+            stroke={winnerColor}
+            strokeWidth="4"
+            strokeLinecap="round"
+            style={{
+              filter: `drop-shadow(0 0 8px ${winnerColor})`,
+              strokeDasharray: 400,
+              strokeDashoffset: 0,
+              animation: "xo-line 0.45s cubic-bezier(0.4,0,0.2,1) forwards",
+            }}
+          />
+        </svg>
+      )}
     </div>
   );
 }
