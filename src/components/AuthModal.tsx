@@ -4,16 +4,34 @@ import Icon from "@/components/ui/icon";
 interface AuthModalProps {
   mode: "login" | "register";
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (dailyBonus?: number) => void;
   onSwitch: (mode: "login" | "register") => void;
+  onRegister: (login: string, email: string, password: string) => Promise<void>;
+  onLogin: (email: string, password: string) => Promise<{ daily_bonus?: number }>;
 }
 
-export default function AuthModal({ mode, onClose, onSuccess, onSwitch }: AuthModalProps) {
+export default function AuthModal({ mode, onClose, onSuccess, onSwitch, onRegister, onLogin }: AuthModalProps) {
   const [form, setForm] = useState({ login: "", email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSuccess();
+    setError("");
+    setLoading(true);
+    try {
+      if (mode === "register") {
+        await onRegister(form.login, form.email, form.password);
+        onSuccess();
+      } else {
+        const data = await onLogin(form.email, form.password);
+        onSuccess(data.daily_bonus);
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Ошибка сервера");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -78,8 +96,15 @@ export default function AuthModal({ mode, onClose, onSuccess, onSwitch }: AuthMo
             />
           </div>
 
-          <button type="submit" className="btn-cream w-full py-2.5 text-sm mt-1">
-            {mode === "login" ? "Войти" : "Зарегистрироваться"}
+          {error && (
+            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-md px-3 py-2">
+              <Icon name="AlertCircle" size={14} style={{ color: "#f04d6a", flexShrink: 0 }} />
+              <span className="text-xs font-medium" style={{ color: "#f04d6a" }}>{error}</span>
+            </div>
+          )}
+
+          <button type="submit" disabled={loading} className="btn-cream w-full py-2.5 text-sm mt-1 disabled:opacity-60 disabled:cursor-not-allowed">
+            {loading ? "Загрузка..." : mode === "login" ? "Войти" : "Зарегистрироваться"}
           </button>
         </form>
 
@@ -106,7 +131,7 @@ export default function AuthModal({ mode, onClose, onSuccess, onSwitch }: AuthMo
         <p className="text-center text-xs text-muted-foreground mt-5">
           {mode === "login" ? "Нет аккаунта?" : "Уже есть аккаунт?"}{" "}
           <button
-            onClick={() => onSwitch(mode === "login" ? "register" : "login")}
+            onClick={() => { setError(""); onSwitch(mode === "login" ? "register" : "login"); }}
             className="cream hover:underline font-semibold"
           >
             {mode === "login" ? "Зарегистрироваться" : "Войти"}

@@ -1,0 +1,45 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "me without token",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "me"},
+      "expectedStatus": 401
+    },
+    {
+      "name": "register success",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "register", "login": "testplayer2", "email": "testplayer2@test.com", "password": "secret123"},
+      "expectedStatus": 200
+    },
+    {
+      "name": "register duplicate",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "register", "login": "testplayer2", "email": "testplayer2@test.com", "password": "secret123"},
+      "expectedStatus": 409
+    },
+    {
+      "name": "login wrong password",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "login", "email": "testplayer2@test.com", "password": "wrongpass"},
+      "expectedStatus": 401
+    },
+    {
+      "name": "login success",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "login", "email": "testplayer2@test.com", "password": "secret123"},
+      "expectedStatus": 200
+    }
+  ]
+}

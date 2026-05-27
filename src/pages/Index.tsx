@@ -8,14 +8,16 @@ import ProPage from "@/components/pages/ProPage";
 import AboutPage from "@/components/pages/AboutPage";
 import Navigation from "@/components/Navigation";
 import AuthModal from "@/components/AuthModal";
+import { useAuth } from "@/hooks/useAuth";
 
 export type Page = "landing" | "dashboard" | "game" | "store" | "leaderboard" | "pro" | "about";
 
 const Index = () => {
+  const { user, loading, register, login, logout, updateUser } = useAuth();
   const [currentPage, setCurrentPage] = useState<Page>("landing");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
-  const [coins, setCoins] = useState(50);
+
+  const isLoggedIn = !!user;
 
   const navigate = (page: Page) => {
     if ((page === "dashboard" || page === "game") && !isLoggedIn) {
@@ -26,16 +28,30 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
+  const handleSuccess = (dailyBonus?: number) => {
     setAuthModal(null);
     setCurrentPage("dashboard");
+    if (dailyBonus) {
+      setTimeout(() => {
+        import("sonner").then(({ toast }) => {
+          toast.success(`+${dailyBonus} монет за ежедневный вход!`);
+        });
+      }, 500);
+    }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
+  const handleLogout = async () => {
+    await logout();
     setCurrentPage("landing");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground text-sm animate-pulse">Загрузка...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,7 +60,7 @@ const Index = () => {
           currentPage={currentPage}
           navigate={navigate}
           isLoggedIn={isLoggedIn}
-          coins={coins}
+          coins={user?.coins ?? 0}
           onLogout={handleLogout}
           onAuthClick={() => setAuthModal("login")}
         />
@@ -58,14 +74,14 @@ const Index = () => {
             onRegisterClick={() => setAuthModal("register")}
           />
         )}
-        {currentPage === "dashboard" && (
-          <DashboardPage navigate={navigate} coins={coins} />
+        {currentPage === "dashboard" && user && (
+          <DashboardPage navigate={navigate} user={user} updateUser={updateUser} />
         )}
-        {currentPage === "game" && (
-          <GamePage navigate={navigate} coins={coins} setCoins={setCoins} />
+        {currentPage === "game" && user && (
+          <GamePage navigate={navigate} user={user} updateUser={updateUser} />
         )}
         {currentPage === "store" && (
-          <StorePage coins={coins} setCoins={setCoins} />
+          <StorePage coins={user?.coins ?? 0} setCoins={(c) => updateUser({ coins: c })} />
         )}
         {currentPage === "leaderboard" && <LeaderboardPage />}
         {currentPage === "pro" && <ProPage />}
@@ -76,8 +92,10 @@ const Index = () => {
         <AuthModal
           mode={authModal}
           onClose={() => setAuthModal(null)}
-          onSuccess={handleLogin}
+          onSuccess={handleSuccess}
           onSwitch={(m) => setAuthModal(m)}
+          onRegister={register}
+          onLogin={login}
         />
       )}
     </div>

@@ -1,17 +1,12 @@
 import { type Page } from "@/pages/Index";
 import Icon from "@/components/ui/icon";
+import { type User } from "@/hooks/useAuth";
 
 interface DashboardPageProps {
   navigate: (page: Page) => void;
-  coins: number;
+  user: User;
+  updateUser: (u: Partial<User>) => void;
 }
-
-const statCards = [
-  { label: "Всего игр",   value: "142", icon: "Gamepad2",  sub: "+12 эта неделя" },
-  { label: "Побед",       value: "89",  icon: "Trophy",    sub: "63% побед" },
-  { label: "Поражений",   value: "31",  icon: "X",         sub: "22% поражений" },
-  { label: "Ничьих",      value: "22",  icon: "Minus",     sub: "15% ничьих" },
-];
 
 const recentMatches = [
   { opponent: "Dragon_Pro", result: "win",  delta: "+18", time: "5 мин назад",  mode: "Онлайн" },
@@ -30,8 +25,21 @@ const achievements = [
   { icon: "💎", name: "PRO-игрок",      unlocked: false },
 ];
 
-export default function DashboardPage({ navigate, coins }: DashboardPageProps) {
-  const winRate = Math.round((89 / 142) * 100);
+export default function DashboardPage({ navigate, user }: DashboardPageProps) {
+  const totalGames = user.wins + user.losses + user.draws;
+  const winRate = totalGames > 0 ? Math.round((user.wins / totalGames) * 100) : 0;
+
+  const statCards = [
+    { label: "Всего игр",   value: String(totalGames), icon: "Gamepad2", sub: "все режимы" },
+    { label: "Побед",       value: String(user.wins),  icon: "Trophy",   sub: `${winRate}% побед` },
+    { label: "Поражений",   value: String(user.losses),icon: "X",        sub: "не сдаёмся" },
+    { label: "Ничьих",      value: String(user.draws), icon: "Minus",    sub: "честный бой" },
+  ];
+
+  const joinYear = user.created_at ? new Date(user.created_at).getFullYear() : "";
+  const joinMonth = user.created_at
+    ? new Date(user.created_at).toLocaleString("ru", { month: "long" })
+    : "";
 
   return (
     <div className="min-h-screen pt-20 pb-16 px-5">
@@ -40,29 +48,33 @@ export default function DashboardPage({ navigate, coins }: DashboardPageProps) {
         {/* Profile */}
         <div className="card-premium p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 animate-fade-in">
           <div className="relative shrink-0">
-            <div className="w-16 h-16 rounded-xl bg-surface-2 border border-border flex items-center justify-center font-black text-2xl sym-x">
-              A
+            <div className="w-16 h-16 rounded-xl bg-surface-2 border border-border flex items-center justify-center text-3xl">
+              {user.avatar_emoji}
             </div>
             <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-background" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2.5 mb-1">
-              <h1 className="font-black text-xl tracking-tight">Alexxx_Pro</h1>
-              <span className="badge-cream">ВЕТЕРАН</span>
+              <h1 className="font-black text-xl tracking-tight">{user.login}</h1>
+              <span className="badge-cream">{user.rank.toUpperCase()}</span>
+              {user.is_pro && <span className="badge-cream">PRO</span>}
             </div>
-            <p className="text-muted-foreground text-xs font-medium mb-3">alexxx@mail.ru · с марта 2025</p>
+            <p className="text-muted-foreground text-xs font-medium mb-3">
+              {user.email} · с {joinMonth} {joinYear}
+            </p>
             <div className="flex flex-wrap gap-4 text-xs font-semibold">
               <span className="flex items-center gap-1.5 text-muted-foreground">
                 <Icon name="Star" size={13} className="cream" />
-                Elo: <span className="cream font-bold">1 482</span>
+                Elo: <span className="cream font-bold">{user.elo}</span>
               </span>
-              <span className="text-muted-foreground">Топ 8% игроков</span>
+              <span className="text-muted-foreground">Уровень {user.level}</span>
+              <span className="text-muted-foreground">🏆 {user.glory_points} очков</span>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
             <div className="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-4 py-2.5">
               <span className="cream font-bold text-lg leading-none">⬡</span>
-              <span className="font-black text-xl">{coins}</span>
+              <span className="font-black text-xl">{user.coins}</span>
               <span className="text-muted-foreground text-xs font-medium">монет</span>
             </div>
             <button onClick={() => navigate("store")} className="text-xs cream hover:underline underline-offset-4 font-semibold">
@@ -106,8 +118,8 @@ export default function DashboardPage({ navigate, coins }: DashboardPageProps) {
                 <div className="h-full bg-cream rounded-full transition-all duration-1000" style={{ width: `${winRate}%` }} />
               </div>
               <div className="flex justify-between text-xs text-muted-foreground mt-2 font-medium">
-                <span>89 побед</span>
-                <span>142 игры</span>
+                <span>{user.wins} побед</span>
+                <span>{totalGames} игр</span>
               </div>
             </div>
 

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { type Page } from "@/pages/Index";
 import Icon from "@/components/ui/icon";
+import { type User } from "@/hooks/useAuth";
 
 interface GamePageProps {
   navigate: (page: Page) => void;
-  coins: number;
-  setCoins: (c: number) => void;
+  user: User;
+  updateUser: (u: Partial<User>) => void;
 }
 
 type Mode = null | "ai-easy" | "ai-medium" | "ai-expert" | "pvp" | "friend";
@@ -70,7 +71,8 @@ const modeOptions = [
   { id: "friend",    label: "С другом",     desc: "По ссылке, без рейтинга",                icon: "Users",  tag: "ДРУЗЬЯ" },
 ];
 
-export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
+export default function GamePage({ navigate, user, updateUser }: GamePageProps) {
+  const coins = user.coins;
   const [mode, setMode] = useState<Mode>(null);
   const [board, setBoard] = useState<Cell[]>(Array(9).fill(null));
   const [turn, setTurn] = useState<"X" | "O">("X");
@@ -92,13 +94,13 @@ export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
     setBoard(nb);
     if (winner) {
       setWinLine(line);
-      if (winner === "X") { setStatus("won"); if (mode === "pvp") setCoins(coins + 15); }
+      if (winner === "X") { setStatus("won"); if (mode === "pvp") updateUser({ coins: coins + 15 }); }
       else setStatus("lost");
       return;
     }
     if (nb.every(c => c !== null)) { setStatus("draw"); return; }
     setTurn(turn === "X" ? "O" : "X");
-  }, [board, turn, status, botThinking, mode, coins, setCoins]);
+  }, [board, turn, status, botThinking, mode, coins, updateUser]);
 
   useEffect(() => {
     if (!mode || mode === "pvp" || mode === "friend" || turn !== "O" || status !== "playing") return;
