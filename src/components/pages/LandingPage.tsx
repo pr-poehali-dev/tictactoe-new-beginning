@@ -25,8 +25,79 @@ const navLinks: { label: string; page: Page | null }[] = [
 
 
 
+const SEQUENCE = [4, 0, 8, 2, 6, 3, 5, 1, 7];
+const SYMBOLS: ("X" | "O")[] = SEQUENCE.map((_, i) => (i % 2 === 0 ? "X" : "O"));
+
+function AnimatedBoard() {
+  const [filled, setFilled] = useState(0);
+  const [cells, setCells] = useState<Array<"X" | "O" | null>>(Array(9).fill(null));
+
+  useEffect(() => {
+    if (filled >= 9) {
+      const t = setTimeout(() => {
+        setCells(Array(9).fill(null));
+        setFilled(0);
+      }, 1800);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => {
+      setCells(prev => {
+        const next = [...prev];
+        next[SEQUENCE[filled]] = SYMBOLS[filled];
+        return next;
+      });
+      setFilled(f => f + 1);
+    }, 700);
+    return () => clearTimeout(t);
+  }, [filled]);
+
+  return (
+    <div className="relative select-none" style={{ width: 200, height: 200 }}>
+      {/* Grid lines */}
+      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-0">
+        {Array(9).fill(null).map((_, i) => (
+          <div key={i} className="relative"
+            style={{
+              borderRight:  (i % 3 !== 2) ? "1.5px solid rgba(77,217,240,0.25)" : "none",
+              borderBottom: (i < 6)       ? "1.5px solid rgba(77,217,240,0.25)" : "none",
+            }}
+          />
+        ))}
+      </div>
+      {/* Cells */}
+      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
+        {cells.map((cell, i) => (
+          <div key={i} className="flex items-center justify-center">
+            {cell && (
+              <span
+                className="font-black text-4xl leading-none"
+                style={{
+                  color: cell === "X" ? "#4dd9f0" : "#f04d6a",
+                  textShadow: cell === "X"
+                    ? "0 0 18px rgba(77,217,240,0.8)"
+                    : "0 0 18px rgba(240,77,106,0.8)",
+                  animation: "xo-pop 0.3s cubic-bezier(0.34,1.56,0.64,1) both",
+                }}
+              >
+                {cell === "X" ? "×" : "○"}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const bottomTabs = [
+  { icon: "Users",         label: "Друзья" },
+  { icon: "Newspaper",     label: "Новости" },
+  { icon: "MessageCircle", label: "Чат" },
+];
+
 export default function LandingPage({ navigate, onLoginClick, onRegisterClick }: LandingPageProps) {
   const [activeNav, setActiveNav] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
   const [matchCount, setMatchCount] = useState(1420);
   const [onlineCount, setOnlineCount] = useState(5689);
 
@@ -127,6 +198,11 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
           </div>
 
           <div className="flex flex-col md:flex-row items-center h-full p-6 md:p-10 gap-8">
+
+            {/* Animated XO board */}
+            <div className="flex-1 flex items-center justify-center shrink-0">
+              <AnimatedBoard />
+            </div>
 
             {/* Hero text */}
             <div className="flex-1 flex flex-col items-start justify-center">
@@ -244,7 +320,58 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
         </div>
       </div>
 
+      {/* ─── BOTTOM BAR ─── */}
+      <div className="relative z-50 border-t flex items-center justify-between px-6 py-2"
+        style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,10,24,0.9)", backdropFilter: "blur(12px)" }}>
 
+        {/* Prev/Next */}
+        <div className="flex items-center gap-2">
+          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <Icon name="ChevronLeft" size={16} style={{ color: "rgba(180,200,240,0.6)" }} />
+          </button>
+          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
+            style={{ background: "rgba(77,217,240,0.12)", border: "1px solid rgba(77,217,240,0.25)" }}>
+            <Icon name="Gamepad2" size={16} style={{ color: "#4dd9f0" }} />
+          </button>
+          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <Icon name="ChevronRight" size={16} style={{ color: "rgba(180,200,240,0.6)" }} />
+          </button>
+        </div>
+
+        {/* Bottom tabs */}
+        <div className="flex items-center gap-6">
+          {bottomTabs.map((tab, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveTab(i)}
+              className="flex flex-col items-center gap-0.5 px-3 py-1 transition-all"
+            >
+              <Icon name={tab.icon} size={18} style={{
+                color: activeTab === i ? "#4dd9f0" : "rgba(180,200,240,0.4)",
+                filter: activeTab === i ? "drop-shadow(0 0 6px #4dd9f0)" : "none",
+              }} />
+              <span className="text-[10px] font-bold tracking-widest" style={{
+                color: activeTab === i ? "#4dd9f0" : "rgba(180,200,240,0.4)",
+              }}>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Play button */}
+        <button
+          onClick={() => navigate("game")}
+          className="px-6 py-2 rounded font-black text-xs tracking-widest transition-all hover:scale-105"
+          style={{
+            background: "linear-gradient(90deg,#4dd9f0,#2a7fb8)",
+            color: "#0a0c1e",
+            boxShadow: "0 0 16px rgba(77,217,240,0.3)",
+          }}
+        >
+          ИГРАТЬ
+        </button>
+      </div>
 
     </div>
   );

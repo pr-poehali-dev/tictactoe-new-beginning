@@ -224,6 +224,23 @@
     background: transparent;
   }
 }
+@keyframes xo-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-15deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.25) rotate(5deg);
+  }
+  80% {
+    transform: scale(0.92) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
 @keyframes win-pulse {
   0%,
   100% {
