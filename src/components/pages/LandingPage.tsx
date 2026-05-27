@@ -101,7 +101,7 @@ function AnimatedBoard() {
 
   const SIZE = 270;
   const [x1, y1, x2, y2] = scenario.lineCoords.map(v => (v / 100) * SIZE);
-  const winnerColor = scenario.winner === "X" ? "#4dd9f0" : "#f04d6a";
+  const winnerColor = "#f5b731";
 
   return (
     <div className="relative select-none" style={{ width: SIZE, height: SIZE }}>
