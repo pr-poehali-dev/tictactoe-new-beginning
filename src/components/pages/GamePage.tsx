@@ -66,7 +66,7 @@ const modeOptions = [
   { id: "ai-easy",   label: "Новичок",      desc: "Бот ошибается — идеально для начала",    icon: "Bot",   tag: "ЛЕГКО" },
   { id: "ai-medium", label: "Любитель",     desc: "Бот защищается, иногда даёт слабину",    icon: "Bot",   tag: "СРЕДНЕ" },
   { id: "ai-expert", label: "Эксперт",      desc: "Минимакс — максимум что вы добьётесь: ничья", icon: "Cpu",   tag: "ВЫЗОВ" },
-  { id: "pvp",       label: "Быстрая игра", desc: "PvP по рейтингу, 15 сек на ход",         icon: "Swords", tag: "+МОНЕТЫ" },
+  { id: "pvp",       label: "Быстрая игра", desc: "Онлайн по рейтингу, 15 сек на ход",      icon: "Swords", tag: "+МОНЕТЫ" },
   { id: "friend",    label: "С другом",     desc: "По ссылке, без рейтинга",                icon: "Users",  tag: "ДРУЗЬЯ" },
 ];
 
@@ -158,7 +158,7 @@ export default function GamePage({ navigate, coins, setCoins }: GamePageProps) {
           </div>
           <div className="mt-4 p-3 rounded-lg bg-surface-2 border border-border">
             <p className="text-xs text-muted-foreground font-medium text-center">
-              Игры с ботом не приносят монеты · PvP — источник заработка
+              Игры с ботом не приносят монеты · Онлайн-матчи — источник заработка
             </p>
           </div>
         </div>

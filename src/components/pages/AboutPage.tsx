@@ -27,21 +27,21 @@ const difficulties = [
 const rules = [
   { icon: "Grid3X3",    text: "Поле 3×3. Первый ход — за игроком X." },
   { icon: "Trophy",     text: "Победа — три символа подряд по горизонтали, вертикали или диагонали." },
-  { icon: "Clock",      text: "В PvP 15 секунд на ход. При просрочке — случайный ход." },
-  { icon: "Star",       text: "PvP матчи влияют на рейтинг Elo. Игры с ботом — нет." },
-  { icon: "Coins",      text: "Монеты за победы в PvP, ежедневный вход и достижения." },
+  { icon: "Clock",      text: "В онлайн-игре 15 секунд на ход. При просрочке — случайный ход." },
+  { icon: "Star",       text: "Онлайн-матчи влияют на рейтинг Elo. Игры с ботом — нет." },
+  { icon: "Coins",      text: "Монеты за победы онлайн, ежедневный вход и достижения." },
   { icon: "Shield",     text: "Все расчёты победы — на сервере. Читы исключены." },
 ];
 
 const monetization = [
-  { side: "Заработать", icon: "TrendingUp", items: ["Победа в PvP: +10–25 монет", "Ежедневный вход: +10 монет", "Просмотр рекламы: +5 монет", "Выполнение достижений"] },
+  { side: "Заработать", icon: "TrendingUp", items: ["Победа онлайн: +10–25 монет", "Ежедневный вход: +10 монет", "Просмотр рекламы: +5 монет", "Выполнение достижений"] },
   { side: "Потратить",  icon: "ShoppingBag", items: ["Скины для X и O", "Поля сражений", "Аватары и значки", "Анимированные стикеры"] },
 ];
 
 const timeline = [
-  { period: "Март 2025",  event: "Запуск первой версии — базовый PvP" },
+  { period: "Март 2025",  event: "Запуск первой версии — базовые онлайн-матчи" },
   { period: "Сезон 1",    event: "Скины, система достижений, 5 000 игроков" },
-  { period: "Сезон 2",    event: "PvP в реальном времени, Elo-рейтинг, магазин" },
+  { period: "Сезон 2",    event: "Онлайн в реальном времени, Elo-рейтинг, магазин" },
   { period: "Сезон 3",    event: "PRO-подписка, тепловые карты, 14 000+ игроков" },
 ];
 
@@ -54,7 +54,7 @@ export default function AboutPage() {
         <div className="py-16 border-b border-border mb-16 animate-fade-in">
           <div className="flex items-center gap-4 mb-8">
             <span className="sym-x font-black text-6xl leading-none">×</span>
-            <span className="text-muted-foreground/20 font-thin text-4xl">vs</span>
+            <span className="text-muted-foreground/20 font-thin text-4xl">против</span>
             <span className="sym-o font-black text-6xl leading-none">○</span>
           </div>
           <h1 className="font-black text-5xl tracking-tight mb-4">О игре</h1>
