@@ -8,17 +8,17 @@ interface DashboardPageProps {
 
 const statCards = [
   { label: "Всего игр",   value: "142", icon: "Gamepad2",  sub: "+12 эта неделя" },
-  { label: "Побед",       value: "89",  icon: "Trophy",    sub: "63% WR" },
-  { label: "Поражений",   value: "31",  icon: "X",         sub: "22% RL" },
-  { label: "Ничьих",      value: "22",  icon: "Minus",     sub: "15% DR" },
+  { label: "Побед",       value: "89",  icon: "Trophy",    sub: "63% побед" },
+  { label: "Поражений",   value: "31",  icon: "X",         sub: "22% поражений" },
+  { label: "Ничьих",      value: "22",  icon: "Minus",     sub: "15% ничьих" },
 ];
 
 const recentMatches = [
-  { opponent: "Dragon_Pro", result: "win",  delta: "+18", time: "5 мин назад",  mode: "PvP" },
+  { opponent: "Dragon_Pro", result: "win",  delta: "+18", time: "5 мин назад",  mode: "Онлайн" },
   { opponent: "Bot (Эксперт)", result: "draw", delta: "+3",  time: "22 мин назад", mode: "ИИ"  },
-  { opponent: "Vanya_88",   result: "loss", delta: "−14", time: "1 ч назад",    mode: "PvP" },
+  { opponent: "Vanya_88",   result: "loss", delta: "−14", time: "1 ч назад",    mode: "Онлайн" },
   { opponent: "Bot (Любитель)", result: "win", delta: "—",  time: "2 ч назад",  mode: "ИИ"  },
-  { opponent: "KingXO",     result: "win",  delta: "+21", time: "вчера",         mode: "PvP" },
+  { opponent: "KingXO",     result: "win",  delta: "+21", time: "вчера",         mode: "Онлайн" },
 ];
 
 const achievements = [

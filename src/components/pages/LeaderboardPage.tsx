@@ -94,7 +94,7 @@ export default function LeaderboardPage() {
             <div className="col-span-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Игрок</div>
             <div className="col-span-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">Elo</div>
             <div className="col-span-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center hidden sm:block">Победы</div>
-            <div className="col-span-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center hidden sm:block">WR%</div>
+            <div className="col-span-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center hidden sm:block">Победы%</div>
             <div className="col-span-3 sm:col-span-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">🔥</div>
           </div>
           <div className="divide-y divide-border">

@@ -123,10 +123,10 @@ export default function StorePage({ coins, setCoins }: StorePageProps) {
                   <div className="self-stretch flex justify-between items-start">
                     <div className="w-5" />
                     {skin.tag === "hit"  && <span className="badge-cream">ХИТ</span>}
-                    {skin.tag === "new"  && <span className="badge-cream">NEW</span>}
-                    {skin.tag === "free" && <span className="badge-muted">FREE</span>}
-                    {skin.tag === "prem" && <span className="badge-muted">PREM</span>}
-                    {skin.tag === "anim" && <span className="badge-cream">ANIM</span>}
+                                    {skin.tag === "new"  && <span className="badge-cream">НОВИНКА</span>}
+                    {skin.tag === "free" && <span className="badge-muted">БЕСПЛАТНО</span>}
+                    {skin.tag === "prem" && <span className="badge-muted">ПРЕМИУМ</span>}
+                    {skin.tag === "anim" && <span className="badge-cream">АНИМАЦИЯ</span>}
                     {!skin.tag && <div />}
                   </div>
                   <div className="flex gap-3 text-4xl font-black">
