@@ -25,58 +25,126 @@ const navLinks: { label: string; page: Page | null }[] = [
 
 
 
-const SEQUENCE = [4, 0, 8, 2, 6, 3, 5, 1, 7];
-const SYMBOLS: ("X" | "O")[] = SEQUENCE.map((_, i) => (i % 2 === 0 ? "X" : "O"));
+// Сценарии: X побеждает по диагонали [0,4,8], O побеждает по строке [3,4,5]
+const SCENARIOS: Array<{
+  moves: Array<{ cell: number; sym: "X" | "O" }>;
+  winner: "X" | "O";
+  winLine: [number, number]; // от центра до центра в % [x1,y1,x2,y2]
+  lineCoords: [number, number, number, number];
+}> = [
+  {
+    moves: [
+      { cell: 4, sym: "X" }, { cell: 1, sym: "O" },
+      { cell: 0, sym: "X" }, { cell: 3, sym: "O" },
+      { cell: 8, sym: "X" },
+    ],
+    winner: "X",
+    winLine: [0, 0, 0, 0],
+    lineCoords: [8, 8, 92, 92],
+  },
+  {
+    moves: [
+      { cell: 4, sym: "O" }, { cell: 0, sym: "X" },
+      { cell: 3, sym: "O" }, { cell: 2, sym: "X" },
+      { cell: 5, sym: "O" },
+    ],
+    winner: "O",
+    winLine: [0, 0, 0, 0],
+    lineCoords: [8, 50, 92, 50],
+  },
+  {
+    moves: [
+      { cell: 6, sym: "X" }, { cell: 0, sym: "O" },
+      { cell: 7, sym: "X" }, { cell: 4, sym: "O" },
+      { cell: 8, sym: "X" },
+    ],
+    winner: "X",
+    winLine: [0, 0, 0, 0],
+    lineCoords: [8, 83, 92, 83],
+  },
+];
 
 function AnimatedBoard() {
-  const [filled, setFilled] = useState(0);
+  const [scenarioIdx, setScenarioIdx] = useState(0);
+  const [step, setStep] = useState(0);
   const [cells, setCells] = useState<Array<"X" | "O" | null>>(Array(9).fill(null));
+  const [showLine, setShowLine] = useState(false);
+
+  const scenario = SCENARIOS[scenarioIdx];
 
   useEffect(() => {
-    if (filled >= 9) {
+    setCells(Array(9).fill(null));
+    setStep(0);
+    setShowLine(false);
+  }, [scenarioIdx]);
+
+  useEffect(() => {
+    if (step < scenario.moves.length) {
       const t = setTimeout(() => {
-        setCells(Array(9).fill(null));
-        setFilled(0);
-      }, 1800);
+        const { cell, sym } = scenario.moves[step];
+        setCells(prev => { const n = [...prev]; n[cell] = sym; return n; });
+        setStep(s => s + 1);
+      }, 650);
       return () => clearTimeout(t);
     }
-    const t = setTimeout(() => {
-      setCells(prev => {
-        const next = [...prev];
-        next[SEQUENCE[filled]] = SYMBOLS[filled];
-        return next;
-      });
-      setFilled(f => f + 1);
-    }, 700);
-    return () => clearTimeout(t);
-  }, [filled]);
+    if (step === scenario.moves.length) {
+      const t = setTimeout(() => setShowLine(true), 200);
+      return () => clearTimeout(t);
+    }
+    if (showLine) {
+      const t = setTimeout(() => {
+        setScenarioIdx(i => (i + 1) % SCENARIOS.length);
+      }, 1600);
+      return () => clearTimeout(t);
+    }
+  }, [step, showLine, scenario.moves.length, scenario]);
+
+  const SIZE = 270;
+  const [x1, y1, x2, y2] = scenario.lineCoords.map(v => (v / 100) * SIZE);
+  const winnerColor = scenario.winner === "X" ? "#4dd9f0" : "#f04d6a";
 
   return (
-    <div className="relative select-none" style={{ width: 200, height: 200 }}>
+    <div className="relative select-none" style={{ width: SIZE, height: SIZE }}>
       {/* Grid lines */}
-      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-0">
-        {Array(9).fill(null).map((_, i) => (
-          <div key={i} className="relative"
+      <svg className="absolute inset-0" width={SIZE} height={SIZE}>
+        {/* vertical */}
+        <line x1={SIZE/3} y1={10} x2={SIZE/3} y2={SIZE-10} stroke="rgba(77,217,240,0.2)" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1={SIZE*2/3} y1={10} x2={SIZE*2/3} y2={SIZE-10} stroke="rgba(77,217,240,0.2)" strokeWidth="1.5" strokeLinecap="round" />
+        {/* horizontal */}
+        <line x1={10} y1={SIZE/3} x2={SIZE-10} y2={SIZE/3} stroke="rgba(77,217,240,0.2)" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1={10} y1={SIZE*2/3} x2={SIZE-10} y2={SIZE*2/3} stroke="rgba(77,217,240,0.2)" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Win line */}
+        {showLine && (
+          <line
+            x1={x1} y1={y1} x2={x2} y2={y2}
+            stroke={winnerColor}
+            strokeWidth="4"
+            strokeLinecap="round"
             style={{
-              borderRight:  (i % 3 !== 2) ? "1.5px solid rgba(77,217,240,0.25)" : "none",
-              borderBottom: (i < 6)       ? "1.5px solid rgba(77,217,240,0.25)" : "none",
+              filter: `drop-shadow(0 0 8px ${winnerColor})`,
+              strokeDasharray: 400,
+              strokeDashoffset: 0,
+              animation: "xo-line 0.45s cubic-bezier(0.4,0,0.2,1) forwards",
             }}
           />
-        ))}
-      </div>
+        )}
+      </svg>
       {/* Cells */}
       <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
         {cells.map((cell, i) => (
           <div key={i} className="flex items-center justify-center">
             {cell && (
               <span
-                className="font-black text-4xl leading-none"
+                className="leading-none"
                 style={{
+                  fontSize: 62,
+                  fontWeight: 900,
                   color: cell === "X" ? "#4dd9f0" : "#f04d6a",
                   textShadow: cell === "X"
-                    ? "0 0 18px rgba(77,217,240,0.8)"
-                    : "0 0 18px rgba(240,77,106,0.8)",
-                  animation: "xo-pop 0.3s cubic-bezier(0.34,1.56,0.64,1) both",
+                    ? "0 0 22px rgba(77,217,240,0.85)"
+                    : "0 0 22px rgba(240,77,106,0.85)",
+                  WebkitTextStroke: cell === "O" ? "2px #f04d6a" : undefined,
+                  animation: "xo-pop 0.32s cubic-bezier(0.34,1.56,0.64,1) both",
                 }}
               >
                 {cell === "X" ? "×" : "○"}
@@ -89,15 +157,8 @@ function AnimatedBoard() {
   );
 }
 
-const bottomTabs = [
-  { icon: "Users",         label: "Друзья" },
-  { icon: "Newspaper",     label: "Новости" },
-  { icon: "MessageCircle", label: "Чат" },
-];
-
 export default function LandingPage({ navigate, onLoginClick, onRegisterClick }: LandingPageProps) {
   const [activeNav, setActiveNav] = useState(0);
-  const [activeTab, setActiveTab] = useState(0);
   const [matchCount, setMatchCount] = useState(1420);
   const [onlineCount, setOnlineCount] = useState(5689);
 
@@ -318,59 +379,6 @@ export default function LandingPage({ navigate, onLoginClick, onRegisterClick }:
             </button>
           </div>
         </div>
-      </div>
-
-      {/* ─── BOTTOM BAR ─── */}
-      <div className="relative z-50 border-t flex items-center justify-between px-6 py-2"
-        style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,10,24,0.9)", backdropFilter: "blur(12px)" }}>
-
-        {/* Prev/Next */}
-        <div className="flex items-center gap-2">
-          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <Icon name="ChevronLeft" size={16} style={{ color: "rgba(180,200,240,0.6)" }} />
-          </button>
-          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
-            style={{ background: "rgba(77,217,240,0.12)", border: "1px solid rgba(77,217,240,0.25)" }}>
-            <Icon name="Gamepad2" size={16} style={{ color: "#4dd9f0" }} />
-          </button>
-          <button className="w-9 h-9 rounded flex items-center justify-center transition-all hover:scale-110"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <Icon name="ChevronRight" size={16} style={{ color: "rgba(180,200,240,0.6)" }} />
-          </button>
-        </div>
-
-        {/* Bottom tabs */}
-        <div className="flex items-center gap-6">
-          {bottomTabs.map((tab, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveTab(i)}
-              className="flex flex-col items-center gap-0.5 px-3 py-1 transition-all"
-            >
-              <Icon name={tab.icon} size={18} style={{
-                color: activeTab === i ? "#4dd9f0" : "rgba(180,200,240,0.4)",
-                filter: activeTab === i ? "drop-shadow(0 0 6px #4dd9f0)" : "none",
-              }} />
-              <span className="text-[10px] font-bold tracking-widest" style={{
-                color: activeTab === i ? "#4dd9f0" : "rgba(180,200,240,0.4)",
-              }}>{tab.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Play button */}
-        <button
-          onClick={() => navigate("game")}
-          className="px-6 py-2 rounded font-black text-xs tracking-widest transition-all hover:scale-105"
-          style={{
-            background: "linear-gradient(90deg,#4dd9f0,#2a7fb8)",
-            color: "#0a0c1e",
-            boxShadow: "0 0 16px rgba(77,217,240,0.3)",
-          }}
-        >
-          ИГРАТЬ
-        </button>
       </div>
 
     </div>
