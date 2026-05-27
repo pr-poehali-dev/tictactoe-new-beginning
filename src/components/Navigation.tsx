@@ -29,7 +29,7 @@ export default function Navigation({ currentPage, navigate, isLoggedIn, coins, o
         <div className="max-w-6xl mx-auto px-5 h-full flex items-center justify-between">
 
           {/* Logo */}
-          <button onClick={() => navigate("dashboard")} className="flex items-center gap-2.5 shrink-0">
+          <button onClick={() => navigate("landing")} className="flex items-center gap-2.5 shrink-0">
             <div className="w-7 h-7 rounded flex items-center justify-center bg-surface-2 border border-border">
               <span className="sym-x text-sm leading-none font-black">×</span>
             </div>
